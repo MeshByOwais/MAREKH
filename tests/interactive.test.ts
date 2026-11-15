@@ -1,5 +1,5 @@
 import {test,expect} from 'bun:test'
-import {computeLivePlan,validateFootprint,PlanningGeneration,type PlanningConfig} from '../src/routing/interactive.ts'
+import {computeLivePlan,validateFootprint,validateStagingCandidate,findNearbyStaging,PlanningGeneration,type PlanningConfig} from '../src/routing/interactive.ts'
 import {sampleProfile,profilePoints,slopeAlerts} from '../src/routing/profile.ts'
 import type {Grid} from '../src/routing/planner.ts'
 
@@ -52,6 +52,34 @@ test('crew staging checks roughness across the whole square, beyond its centre',
   const {grid,config}=fixture();grid.elevation[5*40+5]=1
   expect(validateFootprint(grid,config.staging.cell,10,10,5).cellCount).toBe(121)
   expect(()=>computeLivePlan({id:1,grid,config,mode:'crew',start:config.staging.cell})).toThrow('footprint contains a roughness')
+})
+test('nearby staging checks the complete square and agrees with an exhaustive reference',()=>{
+  const {grid,config}=fixture(),requested={row:10,column:10},hazard=new Uint8Array(1600)
+  grid.slope[5*40+5]=12;hazard[15*40+15]=1
+  expect(()=>validateStagingCandidate(grid,config,requested,hazard)).toThrow('exceeds')
+  const passing:{row:number;column:number;distance:number}[]=[]
+  for(let row=0;row<40;row++)for(let column=0;column<40;column++){
+    const distance=Math.hypot(row-requested.row,column-requested.column)
+    if(distance>12)continue
+    try{validateStagingCandidate(grid,config,{row,column},hazard);passing.push({row,column,distance})}catch{}
+  }
+  passing.sort((a,b)=>a.distance-b.distance||a.row-b.row||a.column-b.column)
+  const actual=findNearbyStaging(grid,config,requested,hazard,12)!
+  expect(actual.footprint.cell).toEqual({row:passing[0].row,column:passing[0].column})
+  expect(actual.displacementM).toBeCloseTo(passing[0].distance,12)
+  expect(requested).toEqual({row:10,column:10})
+  expect(actual.footprint.cells.every(i=>!hazard[i]&&grid.slope[i]<=5)).toBe(true)
+})
+test('nearby staging respects the search radius, missing coverage and impossible terrain',()=>{
+  const {grid,config}=fixture(),requested={row:10,column:10}
+  grid.coverage[5*40+5]=0
+  expect(findNearbyStaging(grid,config,requested,undefined,0)).toBeUndefined()
+  const nearby=findNearbyStaging(grid,config,requested,undefined,1)!
+  expect(nearby.displacementM).toBe(1)
+  expect(nearby.footprint.cell).toEqual({row:10,column:11})
+  grid.slope.fill(6)
+  expect(findNearbyStaging(grid,config,requested)).toBeUndefined()
+  expect(()=>findNearbyStaging(grid,config,{row:NaN,column:10})).toThrow()
 })
 test('a new search, mode change or cancellation makes earlier messages stale',()=>{
   const generation=new PlanningGeneration(),first=generation.next(),second=generation.next()

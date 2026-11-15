@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "staging": {
+    "row": 457,
+    "column": 409
+  },
+  "checkedPieces": 2970,
+  "planSha256": "39c65103acdcbe39522ebf31c7af15c1f71f28a502326429dac0bd6682a153fc",
+  "checker": "Independent Python native geometry, endpoint footprints, both-leg metrics and swept crew clearance"
+}

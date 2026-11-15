@@ -177,10 +177,20 @@ try {
 
   const cursorMarker=new THREE.Mesh(new THREE.SphereGeometry(2.5,16,10),new THREE.MeshBasicMaterial({color:'#ffe26c',depthTest:false}));cursorMarker.renderOrder=5;cursorMarker.visible=false;scene.add(cursorMarker)
   const candidateMarker=new THREE.Mesh(new THREE.SphereGeometry(2.7,12,8),new THREE.MeshBasicMaterial({color:'#e7ac79',wireframe:true,depthTest:false}));candidateMarker.renderOrder=6;candidateMarker.visible=false;scene.add(candidateMarker)
+  const candidateFootprint=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:'#e7ac79',depthTest:false}));candidateFootprint.renderOrder=6;candidateFootprint.visible=false;scene.add(candidateFootprint)
   const planning=createPlanningUI({...manifest,elevation:height,slope,coverage,exclusions},{
     cursor(sample){cursorMarker.position.set(sample.eastM-origin.eastM,sample.elevationM-origin.elevationM+2.5,-(sample.northM-origin.northM));cursorMarker.material.color.set(sample.reasons.length?'#ff7279':'#ffe26c');cursorMarker.visible=routeGroup.visible;draw()},
     choose(index){for(const child of routeGroup.children)if(child.userData.routeIndex!==undefined){const line=child as THREE.Line<THREE.BufferGeometry,THREE.LineBasicMaterial>;line.material.opacity=child.userData.routeIndex===index?1:.25};draw()},
-    candidate(cell){const xy=cell?cellCenter(manifest.transform,cell.row,cell.column):undefined,p=xy?position(xy.x,xy.y,3):undefined;candidateMarker.visible=!!p;if(p)candidateMarker.position.copy(p);draw()},
+    candidate(cell,valid,widthM=10,heightM=10){
+      const xy=cell?cellCenter(manifest.transform,cell.row,cell.column):undefined,p=xy?position(xy.x,xy.y,3):undefined,color=valid?'#8cffa7':'#ff7279'
+      candidateMarker.visible=!!p;candidateMarker.material.color.set(color);if(p)candidateMarker.position.copy(p)
+      const points:THREE.Vector3[]=[]
+      if(xy){const w=xy.x-widthM/2,e=xy.x+widthM/2,s=xy.y-heightM/2,n=xy.y+heightM/2,ring=[[w,s],[e,s],[e,n],[w,n],[w,s]]
+        for(let i=1;i<ring.length;i++){const a=ring[i-1],b=ring[i],steps=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1]));for(let j=0;j<=steps;j++){const v=position(a[0]+(b[0]-a[0])*j/steps,a[1]+(b[1]-a[1])*j/steps,3);if(v)points.push(v)}}}
+      candidateFootprint.visible=points.length>1;candidateFootprint.geometry.dispose();candidateFootprint.geometry=new THREE.BufferGeometry().setFromPoints(points);candidateFootprint.material.color.set(color)
+      node('candidate-key').hidden=!cell;node('candidate-key').textContent=valid?'New staging square · passes footprint checks':'New staging square · rejected';node('candidate-key').style.color=color
+      draw()
+    },
     searchStarted(){++loadGeneration},
     live(plan:LivePlan,config:PlanningConfig){
       const endpoints:Record<string,Endpoint>={}
@@ -212,6 +222,7 @@ try {
     const bounds=global?decode(await bytes('bounds.json',packageManifest,base)):undefined
     if(global&&(!bounds||bounds.exactOptimumClaimed!==false||bounds.gradeLowerDeg>=bounds.gradeUpperDeg||bounds.roundTripBudgetM!==500||JSON.stringify(bounds)!==JSON.stringify(audit.bounds)))throw new Error('Optimality bounds do not match the independent audit')
     const clearanceMap=crew?await texture('../crew-navigation-v1/crew-clearance.webp'):undefined
+    const stagingHazard=mode==='crew'?await bytes('hazard.u8',packageManifest,base):undefined
     if(generation!==loadGeneration)return
     renderRoutes(routes,endpoints,mode)
     const totalEdges = audit.routes.reduce((sum: number, r: { checkedEdges: number }) => sum + r.checkedEdges, 0)
@@ -241,7 +252,7 @@ try {
     routeRules = config.rules
     validatedApproach = [endpoints.approach.eastM, endpoints.approach.northM]
     node('route-downloads').hidden = false;node('saved-review').hidden=false;node('result-kind').textContent='Saved planning result'
-    planning.saved(routes,config,mode)
+    planning.saved(routes,config,mode,stagingHazard)
     draw()
   } catch (error) {
     if(generation!==loadGeneration)return

@@ -46,6 +46,42 @@ export function validateFootprint(grid: Grid, cell: Cell, widthM: number, height
   return {cell:{...cell},eastM:p.x,northM:p.y,elevationM:grid.elevation[cell.row*grid.columns+cell.column],cells,cellCount:cells.length,maxSlopeDeg,slopeLimitDeg:limitDeg,boundsWSEN,geometry:{type:'Polygon',coordinates:[[[w,s],[e,s],[e,n],[w,n],[w,s]]]}}
 }
 
+export function validateStagingCandidate(grid:Grid,config:PlanningConfig,cell:Cell,hazard?:Uint8Array) {
+  const footprint=validateFootprint(grid,cell,config.staging.footprintWidthM,config.staging.footprintHeightM,config.rules.stagingSlopeLimitDeg)
+  if(hazard&&footprint.cells.some(i=>hazard[i]))throw new Error('Staging footprint contains a roughness or other crew terrain hazard.')
+  return footprint
+}
+
+/** Nearest passing native-cell footprint, not an automatic move or route guarantee. */
+export function findNearbyStaging(grid:Grid,config:PlanningConfig,requested:Cell,hazard?:Uint8Array,maxDistanceM=100) {
+  if(![requested.row,requested.column].every(Number.isInteger)||!Number.isFinite(maxDistanceM)||maxDistanceM<0)throw new Error('Choose a valid cell before finding nearby staging.')
+  const {rows,columns,transform:t}=grid,dx=t[1],dy=-t[5]
+  if(t[2]||t[4]||dx<=0||dy<=0)throw new Error('Unsupported footprint grid')
+  if(hazard&&hazard.length!==rows*columns)throw new Error('Crew hazard dimensions do not match')
+  // Integral counts let each complete staging square be checked in constant time.
+  const stride=columns+1,prefix=new Uint32Array((rows+1)*stride)
+  for(let r=0;r<rows;r++){
+    let count=0
+    for(let c=0;c<columns;c++){
+      const i=r*columns+c
+      if(grid.coverage[i]!==1||grid.exclusions[i]||!Number.isFinite(grid.elevation[i])||!Number.isFinite(grid.slope[i])||grid.slope[i]<0||grid.slope[i]>config.rules.stagingSlopeLimitDeg||hazard?.[i])count++
+      prefix[(r+1)*stride+c+1]=prefix[r*stride+c+1]+count
+    }
+  }
+  const halfRows=config.staging.footprintHeightM/(2*dy),halfCols=config.staging.footprintWidthM/(2*dx)
+  const rLo=Math.ceil(-halfRows-.5-1e-9),rHi=Math.floor(halfRows+.5+1e-9),cLo=Math.ceil(-halfCols-.5-1e-9),cHi=Math.floor(halfCols+.5+1e-9)
+  let best:Cell|undefined,bestSquared=maxDistanceM**2
+  for(let r=Math.max(0,Math.ceil(requested.row-maxDistanceM/dy));r<=Math.min(rows-1,Math.floor(requested.row+maxDistanceM/dy));r++)for(let c=Math.max(0,Math.ceil(requested.column-maxDistanceM/dx));c<=Math.min(columns-1,Math.floor(requested.column+maxDistanceM/dx));c++){
+    const squared=((r-requested.row)*dy)**2+((c-requested.column)*dx)**2
+    if(squared>bestSquared||best&&squared===bestSquared)continue
+    const a=r+rLo,b=r+rHi+1,w=c+cLo,e=c+cHi+1
+    if(a<0||w<0||b>rows||e>columns)continue
+    const bad=prefix[b*stride+e]-prefix[a*stride+e]-prefix[b*stride+w]+prefix[a*stride+w]
+    if(bad===0){best={row:r,column:c};bestSquared=squared}
+  }
+  return best?{footprint:validateStagingCandidate(grid,config,best,hazard),displacementM:Math.sqrt(bestSquared)}:undefined
+}
+
 export function computeLivePlan(request: LiveRequest, progress: (text: string) => void = () => {}): LivePlan {
   const {grid,config,mode,start}=request
   if (grid.datasetVersion !== config.datasetVersion) throw new Error('Planning data and rules belong to different terrain versions.')
