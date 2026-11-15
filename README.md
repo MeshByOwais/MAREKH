@@ -31,6 +31,9 @@ bun run serve:planner
 
 The continuous service needs the C++ compiler and numerical Python dependencies described in [the live-planner guide](docs/live-continuous-planning.md); they are installed on this machine. Open the printed local URL. The app needs its local server and WebGL; opening `index.html` directly from disk does not load its modules or terrain assets.
 
+The local service reuses identical running searches and keeps up to 64 independently audited results on disk. Exact-request reuse is invalidated by terrain, rule, implementation or numerical dependency changes. New requests still run the same full-resolution search, refinement and independent audit; this optimization chiefly accelerates repeated plans. The portal solver also retains each successful witness instead of rerunning the final successful search; the graph, constraints and numerical settings are unchanged.
+
+
 The main page includes the terrain explorer, continuous distance/grade controls, live crew/A* comparisons, the linked profile, and downloads for saved or live results. `/review.html` contains the Phase 1 source/coverage review, and `/fixture.html` retains the small synthetic 3D fixture. [The standalone Phase 1 review](docs/phase-1-review.html) can also be opened directly from disk.
 
 ## Reproduce the preparation and build

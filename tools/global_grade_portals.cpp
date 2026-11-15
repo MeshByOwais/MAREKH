@@ -51,7 +51,8 @@ int main(int argc,char**argv){try{
     int f=faces.size();faces.push_back({ids});for(int i:ids)nodes[i].faces.push_back(f);
   }
   cerr<<"Mesh: "<<nodes.size()<<" portals, "<<faces.size()<<" faces, elevation step "<<step<<" m\n";
-  vector<double> dist(nodes.size()),heuristic(nodes.size()),chord(nodes.size());vector<int> parent(nodes.size());size_t expanded=0;
+  vector<double> dist(nodes.size()),heuristic(nodes.size()),chord(nodes.size());vector<int> parent(nodes.size());size_t expanded=0,bestExpanded=0;
+  vector<int> bestPath;double bestDistance=0;
   for(size_t i=0;i<nodes.size();i++)chord[i]=length(nodes[i].p,nodes[goal].p,spacing);
   auto search=[&](double cap){
     fill(dist.begin(),dist.end(),numeric_limits<double>::infinity());fill(parent.begin(),parent.end(),-1);
@@ -64,7 +65,13 @@ int main(int argc,char**argv){try{
       auto [score,i]=queue.top();queue.pop();auto p=nodes[i].p;
       if(score>dist[i]+heuristic[i]+1e-9)continue;
       if(score>budget+1e-9)return false;
-      if(i==goal)return true;expanded++;
+      if(i==goal){
+        // Keep the successful witness before a later grade trial can overwrite
+        // the working arrays. This avoids rerunning the same final A* search.
+        bestPath.clear();for(int k=goal;k!=-1;k=parent[k])bestPath.push_back(k);
+        reverse(bestPath.begin(),bestPath.end());bestDistance=dist[goal];bestExpanded=expanded;
+        return true;
+      }expanded++;
       for(int f:nodes[i].faces)for(int j:faces[f].nodes){
         if(i==j)continue;auto q=nodes[j].p;
         double dr=q.r-p.r,dc=q.c-p.c,dz=q.z-p.z,h2=spacing2*(dr*dr+dc*dc);
@@ -86,8 +93,7 @@ int main(int argc,char**argv){try{
   if(!(high>0&&high<=20&&tolerance>0))throw runtime_error("Invalid grade cap or tolerance");
   if(!search(high))throw runtime_error("No budget-feasible portal witness at the requested grade limit; continuous infeasibility is not established");
   while(!fixed&&high-low>tolerance){double mid=(low+high)/2;bool ok=search(mid);cerr<<setprecision(9)<<mid<<" deg: "<<(ok?dist[goal]:-1)<<" m, "<<expanded<<" expanded\n";if(ok)high=mid;else low=mid;}
-  if(!search(high))throw runtime_error("Failed to repeat upper witness");
-  vector<int> path;for(int i=goal;i!=-1;i=parent[i])path.push_back(i);reverse(path.begin(),path.end());
+  const auto& path=bestPath;dist[goal]=bestDistance;expanded=bestExpanded;
   ofstream out(dir+"/witness.json");out<<setprecision(17)<<"{\"needsGradeRealization\":"<<"false"<<",\"gradeCapDeg\":"<<high<<",\"oneWayDistanceM\":"<<dist[goal]<<",\"portalElevationStepM\":"<<step<<",\"portalCount\":"<<nodes.size()<<",\"faceCount\":"<<faces.size()<<",\"expanded\":"<<expanded<<",\"points\":[";
   bool first=true;for(int i:path){auto p=nodes[i].p;if(!first)out<<",";first=false;out<<"{\"row\":"<<p.r<<",\"column\":"<<p.c<<"}";}out<<"]}\n";
   cerr<<"Saved witness: "<<high<<" deg, "<<2*dist[goal]<<" m round trip, "<<path.size()<<" points\n";

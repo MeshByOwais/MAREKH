@@ -111,6 +111,8 @@ try {
   scene.background = new THREE.Color('#172129')
   const camera = new THREE.PerspectiveCamera(42, 1, 0.2, 6000)
   const controls = new OrbitControls(camera, renderer.domElement)
+  controls.enableDamping = true
+  controls.dampingFactor = 0.12
   controls.screenSpacePanning = false
   controls.mouseButtons.LEFT = THREE.MOUSE.PAN
   controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE
@@ -154,7 +156,19 @@ try {
       if(!el.hidden){el.style.left=`${(v.x+1)*50}%`;el.style.top=`${(1-v.y)*50}%`}
     }
   }
-  const draw = () => {projectLabels();renderer.render(scene, camera)}
+  // Pointer events can arrive faster than the display. Render once per frame,
+  // then keep only the short damping tail alive while the camera settles.
+  let renderPending=false
+  const draw = () => {
+    if(renderPending)return
+    renderPending=true
+    requestAnimationFrame(()=>{
+      const moving=controls.enabled&&controls.update()
+      projectLabels();renderer.render(scene,camera)
+      renderPending=false
+      if(moving)draw()
+    })
+  }
   const colors: Record<string, string> = { home: '#72dbef', science: '#ffbc5c', approach: '#ffffff', staging: '#8cffa7' }
   const contextMarkers:THREE.Mesh[]=[]
   for (const feature of mission.features) {
@@ -346,8 +360,9 @@ try {
       for(const marker of contextMarkers){marker.visible=mode!=='helmet';marker.scale.setScalar(1)}
       node('visor-frame').hidden=mode!=='helmet';node('mission-map').dataset.mode=mode
       for(const child of routeGroup.children){
-        if(child instanceof THREE.Mesh){child.visible=mode!=='helmet';child.scale.setScalar(mode==='flyover'?.5:1)}
-        if(child.userData.routeIndex!==undefined)child.visible=mode==='briefing'||child.userData.selected
+        // Wide route lines are meshes too; only endpoint markers should shrink.
+        if(child.userData.routeIndex!==undefined){child.scale.setScalar(1);child.visible=mode==='briefing'||child.userData.selected}
+        else if(child instanceof THREE.Mesh){child.visible=mode!=='helmet';child.scale.setScalar(mode==='flyover'?.5:1)}
       }
       cursorMarker.scale.setScalar(mode==='flyover'?.32:1)
       for(const id of ['home-view','route-view','full-view','north-view'])node(id).setAttribute('aria-pressed','false')
@@ -514,8 +529,16 @@ try {
     const hits=[-40,40].map(offset=>{raycaster.setFromCamera(new THREE.Vector2(offset/width*2,0),camera);return raycaster.intersectObject(mesh)[0]?.point})
     node('map-scale-label').textContent=hits[0]&&hits[1]?`${Math.hypot(hits[1].x-hits[0].x,hits[1].z-hits[0].z).toFixed(1)} m · at view centre`:'Scale unavailable in this view'
   }
-  controls.addEventListener('change',()=>{mapReference();draw()})
+  // The accurate scale intersects the full terrain twice. Do that after motion,
+  // rather than blocking every pointer event on nearly half a million triangles.
+  let referenceTimer:ReturnType<typeof setTimeout>|undefined
+  controls.addEventListener('change',()=>{
+    if(referenceTimer!==undefined)clearTimeout(referenceTimer)
+    referenceTimer=setTimeout(()=>{referenceTimer=undefined;mapReference()},180)
+    draw()
+  })
   const resize = new ResizeObserver(() => {
+    if(!container.clientWidth||!container.clientHeight)return
     renderer.setSize(container.clientWidth, container.clientHeight)
     camera.aspect = container.clientWidth / container.clientHeight; camera.updateProjectionMatrix();mapReference();draw()
   })

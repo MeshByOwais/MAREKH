@@ -11,9 +11,11 @@ import time
 import uuid
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
+from planner_cache import PlanCache
 
 ROOT=Path(__file__).resolve().parents[1]
 JOBS={};LOCK=threading.Lock()
+CACHE=PlanCache(ROOT)
 
 
 def validate_request(data):
@@ -61,7 +63,10 @@ def execute(job):
             if code==0:
                 result=json.loads((job['work']/'result.json').read_text())
                 if result.get('independentAudit') is not True:raise RuntimeError('Independent check did not finish.')
-                job.update(state='done',text='Plan checked and ready.',result=result)
+                job.update(state='done',text='Plan checked and ready.',result=result,elapsedS=time.monotonic()-job['created'])
+                try:
+                    if CACHE.key(job['request'])==job['cacheKey']:CACHE.put(job['cacheKey'],result)
+                except OSError:pass  # Cache failure must never discard an audited plan.
             else:job.update(state='error',text='Search did not produce a checked route. '+job.get('failure',job['text']))
     except Exception as error:
         with LOCK:
@@ -86,6 +91,8 @@ class Handler(SimpleHTTPRequestHandler):
             if job is None:return self.respond(404,{'error':'Planning job not found.'})
             data={k:job[k] for k in ('id','state','text')}
             if job['state']=='done':data['result']=job['result']
+            data['reused']=job.get('reused',False)
+            data['elapsedS']=job.get('elapsedS',time.monotonic()-job['created'])
         return self.respond(200,data)
     def do_POST(self):
         if not self.allowed():return self.respond(403,{'error':'Local planner origin required.'})
@@ -95,15 +102,30 @@ class Handler(SimpleHTTPRequestHandler):
             if not 0<size<=2048:raise ValueError('Invalid request size.')
             request=validate_request(json.loads(self.rfile.read(size)))
         except (ValueError,TypeError) as error:return self.respond(400,{'error':str(error)})
+        try:cache_key=CACHE.key(request)
+        except OSError:return self.respond(503,{'error':'Planning inputs could not be read. No cached route was used.'})
         with LOCK:
+            matching=next((j for j in JOBS.values() if j.get('cacheKey')==cache_key and j['state'] in ('running','done')),None)
+            if matching is not None:
+                return self.respond(202,{'id':matching['id'],'state':matching['state'],'reused':True})
+            cached=CACHE.get(cache_key)
+            if cached is not None:
+                key=uuid.uuid4().hex
+                JOBS[key]=dict(id=key,state='done',text='Reused the independently checked plan for these exact inputs.',result=cached,created=time.monotonic(),cacheKey=cache_key,reused=True,elapsedS=0)
+                self.trim_jobs()
+                return self.respond(202,{'id':key,'state':'done','reused':True})
             if any(j['state']=='running' for j in JOBS.values()):return self.respond(409,{'error':'Another continuous search is running. Cancel it or wait for it to finish.'})
             key=uuid.uuid4().hex;work=ROOT/'data/work/dynamic'/key;work.mkdir(parents=True)
             (work/'request.json').write_text(json.dumps(request))
-            job=dict(id=key,state='running',text='Preparing continuous terrain search…',work=work,created=time.monotonic());JOBS[key]=job
+            job=dict(id=key,state='running',text='Preparing continuous terrain search…',work=work,created=time.monotonic(),request=request,cacheKey=cache_key);JOBS[key]=job
             # Keep recent job results addressable for pending browser polls.
-            for old in sorted(JOBS.values(),key=lambda j:j['created'])[:-20]:JOBS.pop(old['id'])
+            self.trim_jobs()
         threading.Thread(target=execute,args=(job,),daemon=True).start()
         return self.respond(202,{'id':key,'state':'running'})
+    def trim_jobs(self):
+        completed=sorted((j for j in JOBS.values() if j['state']!='running'),key=lambda j:j['created'])
+        for old in completed[:-20]:JOBS.pop(old['id'])
+
     def do_DELETE(self):
         if not self.allowed():return self.respond(403,{'error':'Local planner origin required.'})
         with LOCK:

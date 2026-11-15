@@ -73,6 +73,17 @@ class PortalSearchTests(unittest.TestCase):
         self.assertAlmostEqual(w['oneWayDistanceM'],math.sqrt(2),places=10);self.assertEqual(w['gradeCapDeg'],3)
         self.assertFalse(w['needsGradeRealization'])
 
+    def test_minimax_retains_last_successful_witness_after_failed_grade_trials(self):
+        self.mesh(.1,4)
+        run=subprocess.run([str(self.binary),str(self.work),'.005','gentlest','20','.005'],check=True,capture_output=True,text=True)
+        witness=json.loads((self.work/'witness.json').read_text())
+        self.assertIn('m, ',run.stderr)  # Includes binary-search trials.
+        self.assertAlmostEqual(witness['gradeCapDeg'],1.6845703125,places=10)
+        self.assertLessEqual(witness['oneWayDistanceM'],4)
+        self.assertEqual(witness['points'][0],dict(row=0,column=0))
+        self.assertEqual(witness['points'][-1],dict(row=1,column=1))
+        self.assertGreater(witness['expanded'],0)
+
     def test_budget_and_peak_cap_are_enforced_without_infeasibility_claim(self):
         self.mesh(.1,2)
         result=subprocess.run([str(self.binary),str(self.work),'.005','shortest','2'],capture_output=True,text=True)
