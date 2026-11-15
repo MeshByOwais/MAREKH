@@ -11,8 +11,15 @@ export function profilePoints(route: ProfileRoute) {
   return [...route.outbound.points,...route.returnLeg.points.slice(1).map(p=>({...p,cumulativeDistanceM:p.cumulativeDistanceM+route.turnaroundDistanceM}))]
 }
 export function sampleProfile(route: ProfileRoute, distance: number, warningDeg: number): ProfileSample {
+  return createProfileSampler(route,warningDeg)(distance)
+}
+/** Cache the joined native points for profile scrubbing and animation frames. */
+export function createProfileSampler(route:ProfileRoute,warningDeg:number) {
+  const points=profilePoints(route)
+  if(!points.length)throw new Error('A route needs at least one profile point')
+  return (distance:number):ProfileSample=>{
   if (!Number.isFinite(distance)) throw new Error('Profile distance must be finite')
-  const points=profilePoints(route),d=Math.max(0,Math.min(route.metrics.distanceM,distance))
+  const d=Math.max(0,Math.min(route.metrics.distanceM,distance))
   let lo=0,hi=points.length-1
   while(lo<hi){const mid=(lo+hi)>>1;if(points[mid].cumulativeDistanceM<d)lo=mid+1;else hi=mid}
   const b=points[Math.max(1,lo)]??points[0],a=points[Math.max(0,lo-1)]
@@ -20,4 +27,5 @@ export function sampleProfile(route: ProfileRoute, distance: number, warningDeg:
   const mix=(x:number,y:number)=>x+(y-x)*t
   return {...b,eastM:mix(a.eastM,b.eastM),northM:mix(a.northM,b.northM),elevationM:mix(a.elevationM,b.elevationM),cumulativeDistanceM:d,distanceM:d,
     leg:Math.abs(d-route.turnaroundDistanceM)<1e-6?'Science turnaround':d>route.turnaroundDistanceM?'Return':'Outbound',reasons:slopeAlerts(b.edgeSurfaceSlopeDeg,warningDeg)}
+  }
 }

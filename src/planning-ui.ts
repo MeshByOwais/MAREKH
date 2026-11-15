@@ -1,6 +1,6 @@
 import type { Cell, Grid } from './routing/planner.ts'
 import { PlanningGeneration, validateStagingCandidate, findNearbyStaging, type PlanningConfig, type LiveMode, type LivePlan, type LiveMessage } from './routing/interactive.ts'
-import { profilePoints, sampleProfile, slopeAlerts, type ProfileRoute, type ProfileSample } from './routing/profile.ts'
+import { profilePoints, createProfileSampler, slopeAlerts, type ProfileRoute, type ProfileSample } from './routing/profile.ts'
 import PlanningWorker from './routing/planning.worker.ts?worker&inline'
 import { validateContinuousOptions, type ContinuousOptions } from './routing/continuous.ts'
 
@@ -9,13 +9,14 @@ const node=(id:string)=>document.getElementById(id)!
 const input=(id:string)=>node(id) as HTMLInputElement
 export function createPlanningUI(grid:Grid, hooks:{
   live(plan:LivePlan,config:PlanningConfig):void; cursor(sample:ProfileSample):void
-  choose(index:number):void; candidate(cell:Cell|undefined,valid?:boolean,widthM?:number,heightM?:number):void; searchStarted():void
+  choose(index:number,route:InspectableRoute,warningDeg:number):void; candidate(cell:Cell|undefined,valid?:boolean,widthM?:number,heightM?:number):void; searchStarted():void
 }) {
   const generation=new PlanningGeneration()
   let worker:Worker|undefined,timer:ReturnType<typeof setTimeout>|undefined,config:PlanningConfig,mode:'global'|LiveMode='global'
   let routes:InspectableRoute[]=[],selected=0,distance=0,picking=false,download:string|undefined
   let activeStart:Cell|undefined,stagingHazard:Uint8Array|undefined
   let continuousJob:string|undefined
+  let profileSample:ReturnType<typeof createProfileSampler>|undefined
   const status=node('placement-status'),form=node('start-form') as HTMLFormElement,slider=input('route-distance')
   function message(text:string,state='idle') {
     status.textContent=text;status.dataset.state=state
@@ -47,14 +48,15 @@ export function createPlanningUI(grid:Grid, hooks:{
   function updateCursor(value:number) {
     const route=routes[selected];if(!route)return
     distance=Math.max(0,Math.min(route.metrics.distanceM,value));slider.value=String(distance)
-    const sample=sampleProfile(route,distance,config.rules.warningSlopeDeg)
+    const sample=profileSample!(distance)
     node('profile-distance').textContent=`${distance.toFixed(2)} / ${route.metrics.distanceM.toFixed(2)} m · ${sample.leg}`
     slider.setAttribute('aria-valuetext',`${distance.toFixed(2)} metres, ${sample.leg}`)
     node('profile-elevation').textContent=Number.isFinite(sample.elevationM)?`${sample.elevationM.toFixed(2)} m`:'Unavailable'
     node('profile-slope').textContent=Number.isFinite(sample.edgeSurfaceSlopeDeg)?`${sample.edgeSurfaceSlopeDeg.toFixed(2)}°`:'Unavailable'
     node('profile-grade').textContent=Number.isFinite(sample.segmentGradeDeg)?`${sample.segmentGradeDeg.toFixed(2)}°`:'Unavailable'
     node('profile-slope').classList.toggle('alert-reading',sample.reasons.length>0)
-    node('profile-alert').textContent=sample.reasons.length?sample.reasons.join(' '):Number.isFinite(sample.edgeSurfaceSlopeDeg)?'No surface-slope warning at this point.':'Surface slope unavailable.'
+    const alert=sample.reasons.length?sample.reasons.join(' '):Number.isFinite(sample.edgeSurfaceSlopeDeg)?'No surface-slope warning at this point.':'Surface slope unavailable.'
+    if(node('profile-alert').textContent!==alert)node('profile-alert').textContent=alert
     node('profile-alert').classList.toggle('alert-reading',sample.reasons.length>0)
     const cursor=node('profile-cursor'),x=40+920*(route.metrics.distanceM?distance/route.metrics.distanceM:0)
     cursor.setAttribute('x1',String(x));cursor.setAttribute('x2',String(x))
@@ -62,6 +64,7 @@ export function createPlanningUI(grid:Grid, hooks:{
   }
   function showProfile(index=0) {
     selected=index;const route=routes[index];if(!route)return
+    profileSample=createProfileSampler(route,config.rules.warningSlopeDeg)
     const points=profilePoints(route),zs=points.map(p=>p.elevationM).filter(Number.isFinite),low=Math.min(...zs),high=Math.max(...zs),span=Math.max(1,high-low)
     const svg=node('route-profile'),normal:string[]=[],warning:string[]=[]
     const xy=(p:typeof points[number])=>`${40+920*(route.metrics.distanceM?p.cumulativeDistanceM/route.metrics.distanceM:0)},${150-110*(p.elevationM-low)/span}`
@@ -72,7 +75,7 @@ export function createPlanningUI(grid:Grid, hooks:{
     slider.max=String(route.metrics.distanceM);slider.disabled=false
     ;(node('route-choice') as HTMLSelectElement).value=String(index)
     for(const [i,button]of [...document.querySelectorAll<HTMLButtonElement>('[data-route-choice]')].entries())button.setAttribute('aria-pressed',String(i===index))
-    hooks.choose(index);updateCursor(0)
+    hooks.choose(index,route,config.rules.warningSlopeDeg);updateCursor(0)
   }
   function setRoutes(next:InspectableRoute[]) {
     routes=next;const select=node('route-choice') as HTMLSelectElement;select.replaceChildren()
@@ -186,6 +189,7 @@ export function createPlanningUI(grid:Grid, hooks:{
   svg.addEventListener('pointermove',event=>{if(svg.hasPointerCapture(event.pointerId))scrub(event)})
   return {
     cancel,
+    seek:updateCursor,
     chooseCell(cell:Cell){if(!picking)return false;cancel();picking=false;node('pick-start').setAttribute('aria-pressed','false');input('start-row').value=String(cell.row);input('start-column').value=String(cell.column);previewCandidate();return true},
     saved(next:InspectableRoute[],nextConfig:PlanningConfig,nextMode:typeof mode,hazard?:Uint8Array){cancel();config=nextConfig;mode=nextMode;stagingHazard=hazard;activeStart={...config.staging.cell};input('start-row').value=String(activeStart.row);input('start-column').value=String(activeStart.column);input('start-row').setAttribute('aria-invalid','false');input('start-column').setAttribute('aria-invalid','false');node('live-download').hidden=true;hooks.candidate(undefined);refreshMode();setRoutes(next);message(mode==='global'?'Saved grade candidate loaded. Its bounds apply to this staging point.':'Saved plan loaded. Choose another staging cell to try a new walk.','current')},
   }

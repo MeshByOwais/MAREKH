@@ -1,6 +1,5 @@
 node_modules/
 dist/
 data/
-public/sites/columbia-hills/synthetic/
 __pycache__/
 *.pyc

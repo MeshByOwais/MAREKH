@@ -6,6 +6,8 @@ import { buildSurface } from './terrain/surface.ts'
 import type { Route, Rules } from './routing/planner.ts'
 import { createPlanningUI, type InspectableRoute } from './planning-ui.ts'
 import type { LivePlan, PlanningConfig } from './routing/interactive.ts'
+import {createRehearsalUI} from './rehearsal-ui.ts'
+import {rehearsalCamera} from './views/rehearsal-camera.ts'
 type DisplayRoute = Pick<Route, 'status' | 'datasetVersion' | 'metrics'> & InspectableRoute
 type Endpoint = {eastM:number;northM:number;geometry:{coordinates:number[][][]}}
 
@@ -107,6 +109,7 @@ try {
   exclusionMesh.renderOrder = 1; scene.add(exclusionMesh)
   const draw = () => renderer.render(scene, camera)
   const colors: Record<string, string> = { home: '#72dbef', science: '#ffbc5c', approach: '#ffffff', staging: '#8cffa7' }
+  const contextMarkers:THREE.Mesh[]=[]
   for (const feature of mission.features) {
     const color = colors[feature.kind] ?? '#ffffff'
     if (feature.geometry.type === 'Point') {
@@ -114,7 +117,7 @@ try {
       const point = position(east, north, 2)
       if (point) {
         const marker = new THREE.Mesh(new THREE.SphereGeometry(1.8, 12, 8), new THREE.MeshBasicMaterial({ color }))
-        marker.position.copy(point); scene.add(marker)
+        marker.position.copy(point); scene.add(marker);contextMarkers.push(marker)
       }
     } else {
       const ring = (feature.geometry.coordinates as number[][][])[0]
@@ -143,7 +146,7 @@ try {
   let crewLayerActive=false,loadGeneration=0
   node('show-crew-clearance').addEventListener('change',event=>{crewClearance.visible=crewLayerActive&&(event.target as HTMLInputElement).checked;draw()})
   node('show-routes').addEventListener('change', event => {
-    routeGroup.visible = (event.target as HTMLInputElement).checked; cursorMarker.visible=routeGroup.visible;draw()
+    routeGroup.visible = (event.target as HTMLInputElement).checked; cursorMarker.visible=routeGroup.visible&&rehearsal?.mode!=='helmet';draw()
   })
 
   function renderRoutes(routes:DisplayRoute[],endpoints:Record<string,Endpoint>,mode:'global'|'crew'|'baseline'|'continuous') {
@@ -179,10 +182,12 @@ try {
   const cursorMarker=new THREE.Mesh(new THREE.SphereGeometry(2.5,16,10),new THREE.MeshBasicMaterial({color:'#ffe26c',depthTest:false}));cursorMarker.renderOrder=5;cursorMarker.visible=false;scene.add(cursorMarker)
   const candidateMarker=new THREE.Mesh(new THREE.SphereGeometry(2.7,12,8),new THREE.MeshBasicMaterial({color:'#e7ac79',wireframe:true,depthTest:false}));candidateMarker.renderOrder=6;candidateMarker.visible=false;scene.add(candidateMarker)
   const candidateFootprint=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:'#e7ac79',depthTest:false}));candidateFootprint.renderOrder=6;candidateFootprint.visible=false;scene.add(candidateFootprint)
+  let rehearsal:ReturnType<typeof createRehearsalUI>|undefined
   const planning=createPlanningUI({...manifest,elevation:height,slope,coverage,exclusions},{
-    cursor(sample){cursorMarker.position.set(sample.eastM-origin.eastM,sample.elevationM-origin.elevationM+2.5,-(sample.northM-origin.northM));cursorMarker.material.color.set(sample.reasons.length?'#ff7279':'#ffe26c');cursorMarker.visible=routeGroup.visible;draw()},
-    choose(index){for(const child of routeGroup.children)if(child.userData.routeIndex!==undefined){const line=child as THREE.Line<THREE.BufferGeometry,THREE.LineBasicMaterial>;line.material.opacity=child.userData.routeIndex===index?1:.25};draw()},
+    cursor(sample){cursorMarker.position.set(sample.eastM-origin.eastM,sample.elevationM-origin.elevationM+2.5,-(sample.northM-origin.northM));cursorMarker.material.color.set(sample.reasons.length?'#ff7279':'#ffe26c');cursorMarker.visible=routeGroup.visible&&rehearsal?.mode!=='helmet';rehearsal?.cursor(sample);draw()},
+    choose(index,route,warningDeg){rehearsal?.setRoute(route,warningDeg);for(const child of routeGroup.children)if(child.userData.routeIndex!==undefined){const line=child as THREE.Line<THREE.BufferGeometry,THREE.LineBasicMaterial>;line.userData.selected=child.userData.routeIndex===index;line.material.opacity=line.userData.selected?1:.25};draw()},
     candidate(cell,valid,widthM=10,heightM=10){
+      if(cell)rehearsal?.exit()
       const xy=cell?cellCenter(manifest.transform,cell.row,cell.column):undefined,p=xy?position(xy.x,xy.y,3):undefined,color=valid?'#8cffa7':'#ff7279'
       candidateMarker.visible=!!p;candidateMarker.material.color.set(color);if(p)candidateMarker.position.copy(p)
       const points:THREE.Vector3[]=[]
@@ -217,6 +222,35 @@ try {
       container.setAttribute('aria-label','Interactive HiRISE terrain showing live route options, staging footprint and the linked profile marker.')
       draw()
     }
+  })
+  let briefingPose:{position:THREE.Vector3;target:THREE.Vector3}|undefined,lastReference=0
+  rehearsal=createRehearsalUI({
+    seek:distance=>planning.seek(distance),
+    mode(mode){
+      if(mode!=='briefing'&&!briefingPose)briefingPose={position:camera.position.clone(),target:controls.target.clone()}
+      controls.enabled=mode==='briefing'
+      node('view-help').textContent=mode==='briefing'?'Drag to orbit · Scroll to zoom · Click to inspect':'Use the distance controls below · Escape returns to Briefing'
+      for(const marker of contextMarkers)marker.visible=mode!=='helmet'
+      for(const child of routeGroup.children){
+        if(child instanceof THREE.Mesh){child.visible=mode!=='helmet';child.scale.setScalar(mode==='flyover'?.5:1)}
+        if(child.userData.routeIndex!==undefined)child.visible=mode==='briefing'||child.userData.selected
+      }
+      cursorMarker.scale.setScalar(mode==='flyover'?.32:1)
+      for(const id of ['home-view','full-view','north-view'])node(id).setAttribute('aria-pressed','false')
+      if(mode==='briefing'&&briefingPose){camera.position.copy(briefingPose.position);controls.target.copy(briefingPose.target);camera.fov=42;camera.near=.2;camera.updateProjectionMatrix();camera.up.set(0,1,0);controls.update();briefingPose=undefined}
+      cursorMarker.visible=routeGroup.visible&&mode!=='helmet'
+      container.dataset.view=mode;mapReference();draw()
+    },
+    pose(mode,frame){
+      if(mode==='briefing')return
+      const pose=rehearsalCamera(mode,frame)
+      const vector=(p:typeof pose.eye)=>new THREE.Vector3(p.eastM-origin.eastM,p.elevationM-origin.elevationM,-(p.northM-origin.northM))
+      camera.position.copy(vector(pose.eye));controls.target.copy(vector(pose.target));camera.up.set(0,1,0);camera.lookAt(controls.target)
+      if(camera.fov!==pose.fov){camera.fov=pose.fov;camera.near=mode==='helmet'?.1:.2;camera.updateProjectionMatrix()}
+      cursorMarker.visible=routeGroup.visible&&mode!=='helmet'
+      if(performance.now()-lastReference>400){mapReference();lastReference=performance.now()}
+      draw()
+    },
   })
   async function loadRoutes(mode: 'global'|'crew'|'baseline') {
    planning.cancel('Loading the selected saved model…');const generation=++loadGeneration
@@ -294,6 +328,7 @@ try {
   const center = ring.reduce((sum, p) => [sum[0] + p[0] / ring.length, sum[1] + p[1] / ring.length], [0, 0])
   const homeTarget = position(center[0], center[1], 0)!
   function setView(view: 'home' | 'full' | 'north') {
+    rehearsal?.exit()
     const target = view === 'full' ? new THREE.Vector3(0, 0, 0) : homeTarget
     controls.target.copy(target)
     const offset = view === 'full' ? new THREE.Vector3(780, 820, 880) : view === 'north' ? new THREE.Vector3(0, 440, 0.001) : new THREE.Vector3(140, 180, 230)
@@ -325,6 +360,7 @@ try {
   let down = [0, 0]
   renderer.domElement.addEventListener('pointerdown', event => { down = [event.clientX, event.clientY] })
   renderer.domElement.addEventListener('pointerup', event => {
+    if(rehearsal?.mode!=='briefing')return
     if (Math.hypot(event.clientX - down[0], event.clientY - down[1]) > 5) return
     const box = renderer.domElement.getBoundingClientRect()
     raycaster.setFromCamera(new THREE.Vector2((event.clientX - box.left) / box.width * 2 - 1, -(event.clientY - box.top) / box.height * 2 + 1), camera)

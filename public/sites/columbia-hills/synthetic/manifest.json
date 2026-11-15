@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "datasetVersion": "synthetic-plane-1",
+  "siteId": "columbia-hills",
+  "provenance": "synthetic",
+  "rows": 9,
+  "columns": 11,
+  "transform": [
+    0.0,
+    5.0,
+    0.0,
+    0.0,
+    0.0,
+    -5.0
+  ],
+  "crsWkt": "PROJCS[\"unknown\",GEOGCS[\"unknown\",DATUM[\"unknown\",SPHEROID[\"unknown\",3396190,0]],PRIMEM[\"Reference meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Equirectangular\"],PARAMETER[\"standard_parallel_1\",0],PARAMETER[\"central_meridian\",0],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+  "units": {
+    "elevation": "m",
+    "slope": "deg"
+  },
+  "storage": {
+    "order": "row-major",
+    "floatByteOrder": "little-endian"
+  },
+  "assets": {
+    "elevation.f32": {
+      "bytes": 396,
+      "sha256": "23416089276fa4be7bb901bfb14d98675f4991f6697354cb9a57d284e89c3a45"
+    },
+    "slope-deg.f32": {
+      "bytes": 396,
+      "sha256": "7945c41f065aec6cb23648604832e48c37329adb4bfe97d3a82b52cccedf6949"
+    },
+    "coverage.u8": {
+      "bytes": 99,
+      "sha256": "d986a426059f79a1c0c82f5f72140a7bd0f028097b7e03dd27a2e9d0c0b46011"
+    },
+    "exclusions.u8": {
+      "bytes": 99,
+      "sha256": "4b298058e1d5fd3f2fa20ead21773912a5dc38da3c0da0bbc7de1adfb6011f1c"
+    }
+  }
+}

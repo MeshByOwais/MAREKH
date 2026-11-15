@@ -21,7 +21,7 @@ The current HTML prototype is a reference for interaction and layout. Its genera
 | **2. Build the terrain** | Prepare a common grid, derive slopes, and export the 3D surface and coverage mask. | A browser scene matches the reference map. The analytic terrain passes elevation, slope, and coordinate checks. |
 | **3. Prove routing** | Build a testable graph, select valid endpoints, and generate a round trip. | A saved real-data route passes independent checks and ends at its departure point. The engine can explain route failures. |
 | **4. Add planning tools · complete** | Make the start movable, compare route options, and link the route profile to the map. | Worker searches, full staging checks, both-leg scrubbing and warning inspection implemented; see the completion record. |
-| **5. Add rehearsal and release** | Connect the cinematic flyover and Helmet view, then test and package the site. | All views use the same route. The demo runs end to end on desktop and mobile. |
+| **5. Add rehearsal and release · complete** | Connect the cinematic flyover and Helmet view, then test and package the site. | All views use the same route. The demo runs end to end on desktop and mobile. |
 
 ```mermaid
 flowchart LR
@@ -172,7 +172,7 @@ In Three.js, use local east and north offsets from a recorded origin. Map east t
 
 ## 7. Phase 4 — Connect the planning features
 
-**Status: complete locally, 15 November 2026.** See [the completion record](docs/phase-4-completion.md). Live Field D* crew and A* searches support movable staging, checked round trips, cancellation and stale-result rejection. A shared cumulative-distance profile drives the map marker and slope alerts across both legs. The continuous-grade candidate retains its original saved bounds; interactive continuous certification remains separate follow-up work.
+**Status: complete locally, 15 November 2026.** See [the completion record](docs/phase-4-completion.md). Live Field D* crew and A* searches support movable staging, checked round trips, cancellation and stale-result rejection. A shared cumulative-distance profile drives the map marker and slope alerts across both legs. Live continuous portal/conic search was subsequently added with movable staging, distance and peak-grade controls, independent route audits and analytical bounds. Its tighter conic certificates remain saved-request evidence; see [the live planner](docs/live-continuous-planning.md).
 
 1. **Briefing.** Load Columbia Hills directly. Show the optical surface, steep-ground hatching, the proposed rover, the route, and the science evidence and approach. Add orbit controls and a scale and north indicator. Keep the original rover traverse available as a cited reference if shown.
 2. **Move start.** Convert a terrain pick to a grid cell. Validate the candidate staging footprint and compute both routes in the worker. Keep the last valid plan on failure. Ignore outdated worker messages when the user moves the rover again. Support map and keyboard placement.
@@ -192,6 +192,8 @@ In Three.js, use local east and north offsets from a recorded origin. Map east t
 
 ## 8. Phase 5 — Rehearse and release
 
+**Status: complete locally, 15 November 2026.** Flyover and Helmet share the selected saved/live route and profile cursor. Playback pauses at the science approach, shows the credited Spirit observation, returns to staging, and supports replay, exit, stepping and reduced motion. The prepared demo can build without source-raster downloads. See [completion and release evidence](docs/phase-5-completion.md).
+
 - **Flyover.** Read the selected route and animate by distance. Pause at the science approach and show Spirit’s observation with credits. Follow the return leg and finish at the same rover. Provide pause, replay, exit, and a reduced-motion option.
 - **Helmet.** Sample position and direction on the same route, set camera height relative to the terrain, and show the route ahead. Keep the next destination and active alerts readable. Check the turnaround and end of the route so the camera faces the correct leg.
 - **Release check.** Starting from a clean checkout, prepare or load the verified site package, run the routing tests, and build the app. On desktop and mobile, reproduce the saved route, move the rover, compare options, scrub alerts, and rehearse through the return. Verify attribution and label data as observed, derived, simulated, or unavailable.
@@ -199,17 +201,20 @@ In Three.js, use local east and north offsets from a recorded origin. Map east t
 
 ## 9. User stories and dependencies
 
-| Story | Implement after | Acceptance check |
-|---|---|---|
-| **Open the mission.** As a planner, I want a default drop-off and science target so I can open a complete Columbia Hills walk. | Verified terrain and round trip | The map loads the committed data and route. Departure and return share the same rover. |
-| **Move the rover.** As a planner, I want to try another staging point so I can see how the walk changes. | Routing and endpoint validation | A valid move recalculates both options. An invalid move explains the failure and keeps the existing plan. |
-| **Compare routes.** As a planner, I want to compare Shortest and Gentler terrain so I can weigh distance against slope. | Both route policies and checked metrics | Both options share endpoints and show distance, climb, and maximum slope. Identical paths are identified. |
-| **Understand a red section.** As an astronaut, I want to inspect the route profile so I can see which reading triggered an alert. | Consistent samples and alert evaluator | The marker follows the cursor. Each active trigger appears in text and highlights its reading. |
-| **Rehearse the walk.** As an astronaut, I want to preview the approach and return so I can recognize the route and the science stop. | Stable route cursor and verified 3D terrain | Briefing, Flyover, and Helmet use the same route. The flyover stops at the approach and ends back at the rover. |
+| Story | Implement after | Acceptance check | Status |
+|---|---|---|---|
+| **Open the mission.** As a planner, I want a default drop-off and science target so I can open a complete Columbia Hills walk. | Verified terrain and round trip | The map loads the committed data and route. Departure and return share the same rover. | Complete |
+| **Move the rover.** As a planner, I want to try another staging point so I can see how the walk changes. | Routing and endpoint validation | A valid move recalculates both options. An invalid move explains the failure and keeps the existing plan. | Complete |
+| **Compare routes.** As a planner, I want to compare Shortest and Gentler terrain so I can weigh distance against slope. | Both route policies and checked metrics | Both options share endpoints and show distance, climb, and maximum slope. Identical paths are identified. | Complete |
+| **Understand a red section.** As an astronaut, I want to inspect the route profile so I can see which reading triggered an alert. | Consistent samples and alert evaluator | The marker follows the cursor. Each active trigger appears in text and highlights its reading. | Complete |
+| **Rehearse the walk.** As an astronaut, I want to preview the approach and return so I can recognize the route and the science stop. | Stable route cursor and verified 3D terrain | Briefing, Flyover, and Helmet use the same route. The flyover stops at the approach and ends back at the rover. | Complete |
 
-## 10. Next implementation task — Phase 5
 
-Use the shared route and cumulative-distance cursor for Flyover and Helmet rehearsal, including science turnaround, return closure, pause/replay and reduced motion. Run the release checks on desktop and mobile. The Phase 4 live plans are engine-checked; downloaded JSON can also be audited independently with `validate:live`.
+## 10. Current user stories complete; separate backlog
+
+The five user stories above are complete through Phase 5. The desktop/mobile rehearsal and clean-demo release checks are recorded in [the Phase 5 completion record](docs/phase-5-completion.md). Live continuous planning now uses the native portal/conic system with independent route checks and conservative analytical bounds; the tighter original conic certificates remain specific to their saved request.
+
+Future work is optional thermal observations, a documented walking model and radiation scenario, multiple sites, and tighter live continuous certificates. Each needs its own input data or model acceptance checks.
 
 Travel time, thermal coverage, operational terrain safety and absolute geolocation accuracy remain unresolved. The saved continuous walking-grade bounds apply to the original endpoints. Recomputing tight continuous certificates interactively is outside the completed Field D* / A* planning milestone.
 
@@ -231,4 +236,4 @@ Travel time, thermal coverage, operational terrain safety and absolute geolocati
 
 ## Continuous walking-grade objective
 
-Added a separate saved result for minimum peak walking grade under a 500 m round-trip limit, followed by distance at the reported feasible cap. The candidate is 494.662 m at 2.600619°; independently checked continuous bounds are 2.150°–2.601°, with a 476.286–494.662 m distance interval at 2.601°. The exact optimum is not claimed. See [method, certificates and reproduction](docs/global-grade-planning.md). Prior navigation packages remain unchanged. Phase 4 now provides live crew/A* replanning; the continuous-grade certificate remains tied to its original endpoints.
+Added a separate saved result for minimum peak walking grade under a 500 m round-trip limit, followed by distance at the reported feasible cap. The candidate is 494.662 m at 2.600619°; independently checked continuous bounds are 2.150°–2.601°, with a 476.286–494.662 m distance interval at 2.601°. The exact optimum is not claimed. See [method, certificates and reproduction](docs/global-grade-planning.md). Prior navigation packages remain unchanged. Phase 4 now provides live crew/A* and continuous portal/conic replanning. Live continuous jobs have independent checks and analytical bounds; the original tighter conic certificates remain tied to their saved request.

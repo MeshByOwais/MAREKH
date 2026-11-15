@@ -18,7 +18,7 @@
     "test:routing": "bun test tests/routing.test.ts",
     "test": "bun run prepare:data && bun run validate:package && bun run test:routing",
     "typecheck": "bun node_modules/typescript/bin/tsc --noEmit",
-    "build": "bun run validate:package && bun run validate:terrain && bun run validate:routes && bun run validate:crew && bun run validate:global && bun run typecheck && bun --bun node_modules/vite/bin/vite.js build",
+    "build": "bun run validate:package && bun run validate:terrain && bun run validate:routes && bun run validate:crew && bun run validate:global && bun run validate:prepared && bun run typecheck && bun --bun node_modules/vite/bin/vite.js build",
     "preview": "bun --bun node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 4173 --strictPort",
     "generate:routes": "bun tools/generate_routes.ts && \"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/validate_routes.py --export",
     "validate:routes": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/validate_routes.py",
@@ -31,7 +31,10 @@
     "test:global": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" -m unittest discover -s tests -p 'test_global_grade.py' -v",
     "test:interactive": "bun test tests/interactive.test.ts",
     "validate:live": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/validate_live_plan.py",
-    "serve:planner": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/serve_planner.py --port 4175"
+    "serve:planner": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/serve_planner.py --port 4175",
+    "validate:prepared": "bun tools/validate-prepared.mjs",
+    "test:rehearsal": "bun test tests/rehearsal.test.ts",
+    "build:demo": "bun run validate:prepared && bun run typecheck && bun --bun node_modules/vite/bin/vite.js build"
   },
   "dependencies": {
     "three": "0.187.0"

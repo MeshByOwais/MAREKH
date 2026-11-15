@@ -6,7 +6,7 @@ Mars Assisted Routing & Environmental Knowledge for Humans. A crew-walk planner 
 
 [Method, proof, numerical limits and reproduction](docs/global-grade-planning.md). Bounds cover continuous headings on the native piecewise-planar surface and retain the crew model's terrain and full-route clearance limits. The original conic certificates remain tied to their original endpoints. The continuous planner now also runs live searches for new staging locations: choose the gentlest candidate within a total distance budget, or a shorter candidate within a peak walking-grade cap. Each live route receives an independent native geometry and clearance audit and conservative analytical bounds. [Live continuous planner](docs/live-continuous-planning.md).
 
-The NASA-informed Field D* crew routes and Phase 3 A* comparison remain selectable and unchanged. [NASA-informed architecture, sources and assumptions](docs/nasa-crew-navigation.md). The project remains a crew-walk planner.
+The NASA-informed Field D* crew routes and Phase 3 A* comparison remain selectable and unchanged. [NASA-informed architecture, sources and assumptions](docs/nasa-crew-navigation.md). The project remains a crew-walk planner. **Phase 5 adds Flyover and Helmet rehearsal**, an automatic science-stop pause with the credited Spirit observation, return completion, replay, shared distance controls and reduced motion. [Rehearsal and release guide](docs/phase-5-completion.md).
 
 ## Run from a fresh checkout
 
@@ -14,10 +14,11 @@ The prepared terrain and saved routes are included, so the interactive app can r
 
 ```bash
 bun install --frozen-lockfile
-bun run dev
+bun run build:demo
+bun run preview --port 4175
 ```
 
-Open the printed local URL. The full `bun run build` command also audits the original source rasters; use the reproduction steps below to prepare that validation environment.
+Open the printed local URL. `build:demo` verifies the committed browser packages and builds the demo without raw rasters or GDAL. The full `bun run build` command also audits the original source rasters; use the reproduction steps below to prepare that validation environment.
 
 ## Open the app on this machine
 
@@ -79,6 +80,9 @@ Bun 1.3.10 is pinned in `.bun-version` and `package.json`. Dependency versions a
 | `bun run test` | Run synthetic preparation, validation and four routing-input smoke tests |
 | `bun run test:coverage` | Run six Phase 1 acquisition, georeferencing and coverage checks |
 | `bun run test:terrain` | Run five analytic terrain checks and five coordinate/mesh checks |
+| `bun run test:rehearsal` | Verify playback, science pause, camera height, return headings and real-route closure |
+| `bun run validate:prepared` | Check all committed browser assets, package links and the science image against their hashes |
+| `bun run build:demo` | Build the verified prepared demo without original rasters or GDAL |
 | `bun run typecheck` | Check TypeScript source and tests |
 | `bun run build` | Validate terrain and route packages, check TypeScript, and build the app into `dist/` |
 | `bun run dev` | Start the Vite development server after preparation |
@@ -111,4 +115,10 @@ Select a policy in the results or **Inspect route**. Scrub the two-leg elevation
 
 Choose **Continuous route planner** to use the native elevation-portal and conic system for new staging locations. **Gentlest within a distance limit** searches for a low peak grade within the total budget. **Shorter within a peak-grade limit** seeks a short route with every native piece below the selected cap; the distance ceiling is also enforced. Average absolute grade is reported separately. Continuous jobs need `bun run serve:planner`, can take minutes, and receive independent checks before display. Their analytical global bounds can be wider than the original saved certificates. Live crew and A* searches still compare distance and terrain cost without these constraints. The UI distinguishes saved evidence, independently checked continuous results and crew/A* engine checks. Production pages include the search worker in their loaded bundle, so new searches for the already loaded model and terrain continue if the local server stops. Initial loading, reloading and fetching another model still need the server.
 
-Run `bun run test:interactive` for the planning/profile checks. Independently audit a downloaded plan with `bun run validate:live /absolute/path/marekh-live-plan.json` (requires the existing Python/GDAL environment). See [Phase 4 completion and limits](docs/phase-4-completion.md). Rehearsal is Phase 5.
+Run `bun run test:interactive` for the planning/profile checks. Independently audit a downloaded plan with `bun run validate:live /absolute/path/marekh-live-plan.json` (requires the existing Python/GDAL environment). See [Phase 4 completion and limits](docs/phase-4-completion.md). Rehearsal is implemented in Phase 5 below.
+
+## Phase 5: rehearse the selected walk
+
+Choose **Flyover** or **Helmet** above the map. **Play preview** follows the selected route, pauses at the science approach with Spirit’s historical observation, and waits for **Continue return** before finishing back at staging. The profile and rehearsal distance controls share one cursor. **Replay from start**, **Exit to Briefing**, Escape and the five-metre step buttons are available. **Reduced motion** defaults to the system preference and keeps navigation manual. Preview pace is not a walking-time estimate.
+
+All five current user stories are complete. See [the Phase 5 record](docs/phase-5-completion.md) for the release sequence, evidence and the separate conditions/multi-site backlog.

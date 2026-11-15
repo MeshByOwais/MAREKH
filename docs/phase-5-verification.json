@@ -1,0 +1,61 @@
+{
+  "date": "2026-11-15",
+  "status": "passed",
+  "tests": {
+    "typescript": 53,
+    "python": 34,
+    "newRehearsalTests": 7
+  },
+  "builds": {
+    "fullSourceAudited": "passed",
+    "preparedDemo": "passed",
+    "cleanCheckout": "passed: frozen-lockfile install, all 53 TypeScript tests, 48-asset validation, typecheck and production build; no data/ or original rasters present"
+  },
+  "browser": {
+    "defaultSavedRoute": {
+      "turnaroundM": 247.330999953656,
+      "totalM": 494.661999907313,
+      "automaticSciencePause": "passed",
+      "returnCompletion": "passed"
+    },
+    "sharedWarning": {
+      "distanceM": 17.7596728777521,
+      "surfaceSlopeDeg": 10.36,
+      "profileAndHelmetSameTrigger": true
+    },
+    "reducedMotion": {
+      "playbackDisabled": true,
+      "manualStepM": 5,
+      "sharedProfileCursor": true
+    },
+    "routeSelection": "passed: terrain policy changed rehearsal route; Escape restored Briefing at the selected distance",
+    "newLiveRoute": {
+      "start": {
+        "row": 371,
+        "column": 406
+      },
+      "totalM": 402.733517841343,
+      "previewReset": true,
+      "helmetReturnComplete": true
+    },
+    "responsive": {
+      "desktop": [
+        1280,
+        800
+      ],
+      "phone": [
+        390,
+        844
+      ],
+      "phoneClientWidth": 375,
+      "phoneScrollWidth": 375,
+      "desktopToPhoneCanvasShrink": "passed after fix",
+      "temporaryViewportReset": true
+    },
+    "scienceImage": "locally packaged, visible, source hash and credits verified",
+    "baselineRoute": "passed: selected gentle policy; both cursors at 209.27 / 418.54 m science approach",
+    "console": "No warnings or errors recorded on the finished rehearsal page",
+    "mapPlaybackControls": "passed: quick Play/Pause/Return controls share the same state and stop at science; starting playback brings the terrain into view"
+  },
+  "scope": "All five current Columbia Hills user stories. Thermal/radiation/walking models, multi-site support and tighter live optimality certificates remain a separate backlog."
+}

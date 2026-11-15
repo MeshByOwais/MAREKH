@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "sourceId": "PIA11758",
+  "sourceUrl": "https://science.nasa.gov/photojournal/rovers-wheel-churns-up-bright-martian-soil/",
+  "credit": "NASA/JPL-Caltech/Cornell",
+  "observedOn": "2007-05-21",
+  "sol": 1202,
+  "description": "Approximately true-color Spirit Panoramic Camera mosaic; historical science context, not a simulated helmet image.",
+  "assets": {
+    "PIA11758.jpg": {
+      "bytes": 127644,
+      "sha256": "c938462f2f05db163a3494408691aa5cc1defe75e1d85a5822eeb29b89730de8",
+      "width": 1280,
+      "height": 584
+    }
+  }
+}
