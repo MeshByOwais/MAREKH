@@ -112,7 +112,7 @@ export function createPlanningUI(grid:Grid, hooks:{
   function refreshObjective(){
     const objective=(node('route-objective') as HTMLSelectElement).value
     input('grade-limit').disabled=mode!=='global'
-    node('grade-limit-label').textContent='Maximum walking grade (°)'
+    node('grade-limit-label').textContent='Peak grade · °'
     node('objective-help').textContent=objective==='gentlest'?'Seek the lowest peak walking grade within your total distance budget, then shorten that candidate. Average grade is reported separately. Calculate both options also uses the peak cap for the shorter candidate.':'Seek a short route whose every native piece stays below the chosen walking-grade cap. The total distance limit is also enforced; increase it to allow longer detours.'
   }
   function applyPlan(plan:LivePlan,planConfig:PlanningConfig,record:unknown){

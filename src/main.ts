@@ -5,6 +5,9 @@ import {segmentTouchesIncident,type Incident} from './routing/incidents.ts'
 import { averageAbsoluteGrade } from './routing/continuous.ts'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { LineSegments2 } from 'three/addons/lines/LineSegments2.js'
+import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js'
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
 import { cellCenter, readFloatGrid, worldToPixel, type RealTerrainManifest } from './terrain/package.ts'
 import { buildSurface } from './terrain/surface.ts'
 import type { Route, Rules } from './routing/planner.ts'
@@ -108,6 +111,16 @@ try {
   scene.background = new THREE.Color('#172129')
   const camera = new THREE.PerspectiveCamera(42, 1, 0.2, 6000)
   const controls = new OrbitControls(camera, renderer.domElement)
+  controls.screenSpacePanning = false
+  controls.mouseButtons.LEFT = THREE.MOUSE.PAN
+  controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE
+  controls.touches.ONE = THREE.TOUCH.PAN
+  controls.touches.TWO = THREE.TOUCH.DOLLY_ROTATE
+  for(const mode of ['pan','orbit'] as const) node(`map-${mode}`).addEventListener('click',()=>{
+    controls.mouseButtons.LEFT=mode==='pan'?THREE.MOUSE.PAN:THREE.MOUSE.ROTATE
+    controls.touches.ONE=mode==='pan'?THREE.TOUCH.PAN:THREE.TOUCH.ROTATE
+    for(const name of ['pan','orbit'])node(`map-${name}`).setAttribute('aria-pressed',String(name===mode))
+  })
   controls.minDistance = 35; controls.maxDistance = 2600; controls.maxPolarAngle = Math.PI * 0.495
   const geometry = new THREE.BufferGeometry()
   geometry.setAttribute('position', new THREE.BufferAttribute(surface.positions, 3))
@@ -125,7 +138,7 @@ try {
     textures.set(name, value)
     return value
   }
-  const material = new THREE.MeshBasicMaterial({ map: await texture('texture.webp'), side: THREE.DoubleSide })
+  const material = new THREE.MeshBasicMaterial({ map: await texture('texture.webp'), color: '#f4ae7e', side: THREE.DoubleSide })
   const mesh = new THREE.Mesh(geometry, material)
   scene.add(mesh)
   const exclusionMaterial = new THREE.MeshBasicMaterial({ map: await texture('exclusions.webp'), transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, side: THREE.DoubleSide })
@@ -238,8 +251,9 @@ try {
       }
       for(const [points,bad]of [[normal,false],[uncertain,true]] as const){
         if(!points.length)continue
-        const material=bad?new THREE.LineDashedMaterial({color:'#d9e0e8',dashSize:2,gapSize:2,transparent:true}):new THREE.LineBasicMaterial({color,transparent:true})
-        const line=new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(points),material);if(bad)line.computeLineDistances();line.userData.routeIndex=routeIndex;line.userData.selected=routeIndex===(planning?.selectedIndex??0);line.material.opacity=line.userData.selected?1:.25;line.visible=rehearsal?.mode==='briefing'||line.userData.selected;routeGroup.add(line)
+        const material=new LineMaterial({color:bad?'#d9e0e8':color,linewidth:bad?3:4,transparent:true,dashed:bad,dashSize:2,gapSize:2,worldUnits:false})
+        const geometry=new LineSegmentsGeometry().setPositions(points.flatMap(p=>[p.x,p.y,p.z]))
+        const line=new LineSegments2(geometry,material);if(bad)line.computeLineDistances();line.userData.routeIndex=routeIndex;line.userData.selected=routeIndex===(planning?.selectedIndex??0);line.material.opacity=line.userData.selected?1:.35;line.visible=rehearsal?.mode==='briefing'||line.userData.selected;routeGroup.add(line)
       }
       const row = document.createElement('tr'), m = route.metrics
       for (const value of [route.name?route.name:mode==='continuous'?(route.policy==='minimax-grade'?'Gentler · distance limit':'Shorter · peak limit'):global?'Best grade candidate':crew?(distancePolicy?'Distance priority':'Terrain priority'):(distancePolicy?'Shortest':'Gentler terrain'), `${m.distanceM.toFixed(2)} m`, `${m.positiveClimbM.toFixed(2)} m`, `${m.maxSurfaceSlopeDeg.toFixed(2)}°`, `${m.maxAbsGradeDeg.toFixed(2)}°`, `${averageAbsoluteGrade([route.outbound,route.returnLeg]).toFixed(2)}°`, String(m.warningEdgeCount),minutes(createTiming(route,planning.scenario).totalS)]) {
@@ -328,7 +342,7 @@ try {
     mode(mode){
       if(mode!=='briefing'&&!briefingPose)briefingPose={position:camera.position.clone(),target:controls.target.clone()}
       controls.enabled=mode==='briefing'
-      node('view-help').textContent=mode==='briefing'?'Drag to orbit · Scroll to zoom · Click to inspect':'Use the distance controls below · Escape returns to Briefing'
+      node('view-help').textContent=mode==='briefing'?'Drag to pan · Right-drag to orbit · Scroll to zoom':'Use the distance controls below · Escape returns to Briefing'
       for(const marker of contextMarkers){marker.visible=mode!=='helmet';marker.scale.setScalar(1)}
       node('visor-frame').hidden=mode!=='helmet';node('mission-map').dataset.mode=mode
       for(const child of routeGroup.children){
@@ -461,7 +475,7 @@ try {
     try {
       const map = await texture(selected)
       if (requestedLayer !== selected) return
-      material.map = map; material.needsUpdate = true
+      material.map = map; material.color.set(selected==='texture.webp'?'#f4ae7e':'#ffffff'); material.needsUpdate = true
       node('slope-key').hidden = selected !== 'slope.webp'
       draw()
     } catch (error) { console.error(error); status.textContent = 'The selected surface layer could not load.' }
