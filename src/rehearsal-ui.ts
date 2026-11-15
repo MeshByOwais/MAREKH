@@ -7,11 +7,10 @@ export function createRehearsalUI(hooks:{seek(distance:number):void;sample(dista
   let playback:RehearsalPlayback|undefined,track:ReturnType<typeof createRouteTrack>|undefined,mode:RehearsalMode='briefing'
   let frameId:number|undefined,lastTime:number|undefined,publishing=false
   const motion=matchMedia('(prefers-reduced-motion: reduce)')
-  input('reduced-motion').checked=motion.matches
   function stopFrames(){if(frameId!==undefined)cancelAnimationFrame(frameId);frameId=undefined;lastTime=undefined}
   function render(){
     if(!playback||!track)return
-    const sample=hooks.sample(playback.distanceM)??track(playback.distanceM).sample,reduced=input('reduced-motion').checked
+    const sample=hooks.sample(playback.distanceM)??track(playback.distanceM).sample,reduced=motion.matches
     const isScience=playback.stage==='science'
     node('rehearsal-panel').hidden=false
     node('rehearsal-hud').hidden=mode==='briefing'
@@ -44,13 +43,13 @@ export function createRehearsalUI(hooks:{seek(distance:number):void;sample(dista
     pause();mode=next;hooks.mode(mode);pose();render()
   }
   function tick(now:number){
-    frameId=undefined;if(!playback?.playing||input('reduced-motion').checked||document.hidden||!hooks.canPlay()){pause();return}
+    frameId=undefined;if(!playback?.playing||motion.matches||document.hidden||!hooks.canPlay()){pause();return}
     const delta=lastTime===undefined?0:Math.min(.1,Math.max(0,(now-lastTime)/1000));lastTime=now
-    playback.advance(delta,Number((node('preview-speed') as HTMLSelectElement).value));publish()
+    playback.advance(delta,12);publish()
     if(playback.playing)frameId=requestAnimationFrame(tick);else stopFrames()
   }
   function play(){
-    if(!playback||mode==='briefing'||input('reduced-motion').checked||!hooks.canPlay())return
+    if(!playback||mode==='briefing'||motion.matches||!hooks.canPlay())return
     if(playback.playing){pause();return}
     if(playback.stage==='complete')hooks.replay()
     playback.play();render();node('terrain-view').scrollIntoView({block:'center',behavior:'instant'});frameId=requestAnimationFrame(tick)
@@ -65,8 +64,7 @@ export function createRehearsalUI(hooks:{seek(distance:number):void;sample(dista
   node('preview-science').addEventListener('click',()=>seek(playback?.turnaroundM??0))
   node('preview-finish').addEventListener('click',()=>seek(playback?.totalM??0))
   input('rehearsal-distance-slider').addEventListener('input',()=>seek(Number(input('rehearsal-distance-slider').value)))
-  input('reduced-motion').addEventListener('change',pause)
-  motion.addEventListener('change',event=>{input('reduced-motion').checked=event.matches;pause()})
+  motion.addEventListener('change',pause)
   document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()})
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&mode!=='briefing'){setMode('briefing');node('mode-briefing').focus()}})
   return {

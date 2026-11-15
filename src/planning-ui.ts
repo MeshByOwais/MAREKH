@@ -28,7 +28,7 @@ export function createPlanningUI(grid:Grid, hooks:{
   const status=node('placement-status'),form=node('start-form') as HTMLFormElement,slider=input('route-distance')
   function message(text:string,state='idle') {
     status.textContent=text;status.dataset.state=state
-    const summary=node('route-placement-status');summary.hidden=false;summary.dataset.state=state
+    const summary=node('route-placement-status');summary.hidden=state==='current'||state==='ready';summary.dataset.state=state
     summary.textContent=text
   }
   function candidate() {
@@ -41,12 +41,12 @@ export function createPlanningUI(grid:Grid, hooks:{
       const footprint=validateStagingCandidate(grid,config,p,stagingHazard)
       hooks.candidate(p,true,config.staging.footprintWidthM,config.staging.footprintHeightM)
       input('start-row').setAttribute('aria-invalid','false');input('start-column').setAttribute('aria-invalid','false')
-      message(`Staging ${p.row}, ${p.column} passes the footprint checks (${footprint.maxSlopeDeg.toFixed(2)}° maximum). Choose Plan route to update the walk.`,'ready')
+      message(`Staging ${p.row}, ${p.column} · ${footprint.maxSlopeDeg.toFixed(2)}° max slope.`,'ready')
       return true
     }catch(error){
       hooks.candidate(Number.isInteger(p.row)&&Number.isInteger(p.column)?p:undefined,false,config.staging.footprintWidthM,config.staging.footprintHeightM)
       input('start-row').setAttribute('aria-invalid','true');input('start-column').setAttribute('aria-invalid','true')
-      message(`New start not applied. ${error instanceof Error?error.message:'Invalid staging.'} Choose another start or use Find nearby start. The displayed route is unchanged.`,'invalid')
+      message(`Start not applied. ${error instanceof Error?error.message:'Invalid staging.'} Route unchanged.`,'invalid')
       return false
     }
   }
@@ -82,7 +82,7 @@ export function createPlanningUI(grid:Grid, hooks:{
     for(let i=1;i<points.length;i++)(mission.sample((points[i-1].cumulativeDistanceM+points[i].cumulativeDistanceM)/2)!.reasons.length?warning:normal).push(`M${xy(points[i-1])}L${xy(points[i])}`)
     const turn=40+920*(route.metrics.distanceM?route.turnaroundDistanceM/route.metrics.distanceM:0)
     svg.innerHTML=`<title>Round-trip elevation profile; red pieces have terrain or environmental scenario alerts</title><path d="${normal.join('')}" class="profile-line"/><path d="${warning.join('')}" class="profile-warning"/><line x1="${turn}" x2="${turn}" y1="22" y2="164" class="turn-line"/><line id="profile-cursor" y1="25" y2="164" class="cursor-line"/>`
-    node('profile-range').textContent=`Elevation ${low.toFixed(2)} to ${high.toFixed(2)} m · Mars 2000 datum · distance includes both legs`
+    node('profile-range').textContent=`Elevation ${low.toFixed(2)}–${high.toFixed(2)} m · Mars 2000 datum`
     slider.max=String(route.metrics.distanceM);slider.disabled=false
     ;(node('route-choice') as HTMLSelectElement).value=String(index)
     for(const [i,button]of [...document.querySelectorAll<HTMLButtonElement>('[data-route-choice]')].entries())button.setAttribute('aria-pressed',String(i===index))
@@ -105,20 +105,20 @@ export function createPlanningUI(grid:Grid, hooks:{
     node('continuous-controls').hidden=mode!=='global'
     ;(node('route-objective') as HTMLSelectElement).disabled=mode!=='global'
     input('distance-budget').disabled=mode!=='global'
-    node('plan-submit').textContent=mode==='global'?'Plan route':'Plan both routes';node('compare-continuous').hidden=mode!=='global';(node('compare-dropoffs') as HTMLButtonElement).disabled=mode!=='global'
-    node('live-start-help').textContent=mode==='global'?'Choose staging and a distance–grade trade-off. This local planner searches native triangle crossings and improves them continuously, using the same system as the saved grade route. Searches can take several minutes. Both legs count toward the distance limit.':'Pick a cell or enter its row and column. The full 10 × 10 m staging square must pass the 5° limit. Find nearby valid staging proposes a passing square within 100 m. Choose Plan route to apply it.'
+    const planLabel=node('plan-submit').querySelector('span');if(planLabel)planLabel.textContent=mode==='global'?'Plan':'Both';node('compare-continuous').hidden=mode!=='global';(node('compare-dropoffs') as HTMLButtonElement).disabled=mode!=='global'
+    node('live-start-help').textContent=mode==='global'?'Pick a start, then a budget or a grade cap. Both legs count. A search can take a few minutes.':'Pick a cell or type its row and column. The 10 × 10 m square must pass the 5° limit.'
     refreshObjective()
   }
   function refreshObjective(){
     const objective=(node('route-objective') as HTMLSelectElement).value
     input('grade-limit').disabled=mode!=='global'
-    node('grade-limit-label').textContent='Steepest section · °'
-    node('objective-help').textContent=objective==='gentlest'?'Minimize the steepest section within your round-trip limit. The section limit applies when finding both options.':'Minimize distance within both limits. The section limit includes uphill and downhill.'
+    node('grade-limit-label').textContent='Max grade · °'
+    node('objective-help').textContent=objective==='gentlest'?'Gentlest walk under your budget.':'Shortest walk under the grade cap.'
   }
   function applyPlan(plan:LivePlan,planConfig:PlanningConfig,record:unknown){
     for(const route of plan.routes as InspectableRoute[]){delete route.samplingSpentMinutes;delete route.scienceMinutes;delete route.completedDistanceM}
     lastRecord=(record&&typeof record==='object'?record:{}) as Record<string,unknown>;stop();config=planConfig;activeStart={...plan.staging.cell};input('start-row').value=String(activeStart.row);input('start-column').value=String(activeStart.column);hooks.live(plan,config);setRoutes(plan.routes)
-    message(`Plan updated · start ${activeStart.row}, ${activeStart.column} · outbound and return checked${plan.independentAudit?' independently':''}.`,'current');hooks.candidate(undefined)
+    message(`Plan updated · ${activeStart.row}, ${activeStart.column} · both legs${plan.independentAudit?' independently ':''}checked.`,'current');hooks.candidate(undefined)
     if(download)URL.revokeObjectURL(download)
     download=URL.createObjectURL(new Blob([JSON.stringify(record,null,2)],{type:'application/json'}))
     const link=node('live-download') as HTMLAnchorElement;link.href=download;link.hidden=false
@@ -204,10 +204,10 @@ export function createPlanningUI(grid:Grid, hooks:{
     cancel();const requested=candidate()
     try{
       const nearby=findNearbyStaging(grid,config,requested,stagingHazard)
-      if(!nearby){message('No valid start found within 100 m. Choose another area. Your route is unchanged.','invalid');return}
+      if(!nearby){message('No start within 100 m. Route unchanged.','invalid');return}
       const p=nearby.footprint.cell
       picking=false;node('pick-start').setAttribute('aria-pressed','false');input('start-row').value=String(p.row);input('start-column').value=String(p.column)
-      previewCandidate();message(`Suggested staging ${p.row}, ${p.column}, ${nearby.displacementM.toFixed(2)} m from ${requested.row}, ${requested.column}. The full square passes staging checks. Choose Plan route to apply this location; route connectivity will be checked next.`,'ready')
+      previewCandidate();message(`Staging ${p.row}, ${p.column} · ${nearby.displacementM.toFixed(2)} m away.`,'ready')
     }catch(error){message(error instanceof Error?error.message:'Could not find nearby staging.','invalid')}
   })
   for(const id of ['start-row','start-column','route-objective','distance-budget','grade-limit'])node(id).addEventListener('input',()=>{cancel();refreshObjective();previewCandidate()})
@@ -328,6 +328,6 @@ export function createPlanningUI(grid:Grid, hooks:{
       if(best>toleranceM)return false;hooks.pause();updateCursor(bestDistance);return true
     },
     chooseCell(cell:Cell){if(!picking)return false;cancel();picking=false;node('pick-start').setAttribute('aria-pressed','false');input('start-row').value=String(cell.row);input('start-column').value=String(cell.column);previewCandidate();return true},
-    saved(next:InspectableRoute[],nextConfig:PlanningConfig,nextMode:typeof mode,hazard?:Uint8Array){cancel();resetIncidents(false);cacheKey='';continuousCache=[];lastRecord={status:'saved-package',independentAudit:true,navigationModel:nextMode};config=nextConfig;mode=nextMode;stagingHazard=hazard;activeStart={...config.staging.cell};input('start-row').value=String(activeStart.row);input('start-column').value=String(activeStart.column);input('start-row').setAttribute('aria-invalid','false');input('start-column').setAttribute('aria-invalid','false');node('live-download').hidden=true;hooks.candidate(undefined);refreshMode();setRoutes(next);message(mode==='global'?'Saved route ready. Choose a different start to plan a new walk.':'Saved route ready. Choose a different start to plan a new walk.','current')},
+    saved(next:InspectableRoute[],nextConfig:PlanningConfig,nextMode:typeof mode,hazard?:Uint8Array){cancel();resetIncidents(false);cacheKey='';continuousCache=[];lastRecord={status:'saved-package',independentAudit:true,navigationModel:nextMode};config=nextConfig;mode=nextMode;stagingHazard=hazard;activeStart={...config.staging.cell};input('start-row').value=String(activeStart.row);input('start-column').value=String(activeStart.column);input('start-row').setAttribute('aria-invalid','false');input('start-column').setAttribute('aria-invalid','false');node('live-download').hidden=true;hooks.candidate(undefined);refreshMode();setRoutes(next);message('Saved route loaded.','current')},
   }
 }

@@ -6,14 +6,14 @@ const sidebar=document.createElement('section');sidebar.className='workspace-sid
 const dashboard=document.createElement('div');dashboard.className='mission-workspace'
 const tabs=document.createElement('div');tabs.className='workspace-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Workspace sections')
 const panes=document.createElement('div');panes.className='workspace-panes'
-const sections=[['plan','Plan'],['routes','Routes'],['rehearse','Preview'],['conditions','Time'],['more','More']] as const
+const sections=[['plan','Plan','path'],['routes','Route','signpost'],['rehearse','Walk','walk'],['conditions','Time','clock'],['more','Info','more']] as const
 const panels=new Map<string,HTMLElement>()
-for(const [id,label] of sections){
- const button=document.createElement('button');button.id=`tab-${id}`;button.type='button';button.textContent=label;button.setAttribute('role','tab');button.setAttribute('aria-controls',`pane-${id}`);if(id==='conditions')button.hidden=true
+for(const [id,label,icon] of sections){
+ const button=document.createElement('button');button.id=`tab-${id}`;button.type='button';button.innerHTML=`<svg class="i" aria-hidden="true"><use href="#i-${icon}"/></svg><span>${label}</span>`;button.setAttribute('role','tab');button.setAttribute('aria-controls',`pane-${id}`);if(id==='conditions')button.hidden=true
  const panel=document.createElement('div');panel.id=`pane-${id}`;panel.className='workspace-pane';panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby',button.id);panel.tabIndex=0
  tabs.append(button);panes.append(panel);panels.set(id,panel)
 }
-const mapTab=document.createElement('button');mapTab.type='button';mapTab.className='mobile-map-tab';mapTab.textContent='Map';mapTab.setAttribute('aria-label','Show terrain map');mapTab.setAttribute('role','tab');mapTab.setAttribute('aria-controls','terrain-panel');scene.id='terrain-panel';tabs.prepend(mapTab)
+const mapTab=document.createElement('button');mapTab.type='button';mapTab.className='mobile-map-tab';mapTab.innerHTML='<svg class="i" aria-hidden="true"><use href="#i-map"/></svg><span>Map</span>';mapTab.setAttribute('aria-label','Show terrain map');mapTab.setAttribute('role','tab');mapTab.setAttribute('aria-controls','terrain-panel');scene.id='terrain-panel';tabs.prepend(mapTab)
 function showWorkspaceTab(id:string){
  for(const [key,panel] of panels){panel.hidden=key!==id;const button=document.getElementById(`tab-${key}`)!;button.setAttribute('aria-selected',String(key===id));button.tabIndex=key===id?0:-1}
  dashboard.dataset.mobileView='tools';mapTab.setAttribute('aria-pressed','false');mapTab.setAttribute('aria-selected','false');mapTab.tabIndex=-1
@@ -71,7 +71,7 @@ element('jump-science').addEventListener('click',()=>{element('go-turnaround').c
 element('focus-workspace').addEventListener('click',()=>{
  const focused=document.body.classList.toggle('workspace-focus')
  element('focus-workspace').setAttribute('aria-pressed',String(focused))
- element('focus-workspace').textContent=focused?'Exit focus':'Focus mode'
+ element('focus-workspace').querySelector('span')!.textContent=focused?'Exit':'Focus'
  if(focused)map()
 })
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&document.body.classList.contains('workspace-focus'))element('focus-workspace').click()})
@@ -83,27 +83,16 @@ const ready=new MutationObserver(()=>{
 ready.observe(element('rehearsal-view-controls'),{attributes:true,attributeFilter:['hidden']})
 for(const id of ['launch-helmet','jump-science'])(element(id) as HTMLButtonElement).disabled=!!element('rehearsal-view-controls').hidden
 
-// A sparse, uneven sky: mostly faint stars, with only a few slow variations.
-const sky=document.createElement('div')
-sky.className='space-sky';sky.setAttribute('aria-hidden','true')
-let starSeed=7031
-const random=()=>{starSeed=(starSeed*16807)%2147483647;return (starSeed-1)/2147483646}
-for(let i=0;i<95;i++){
- const star=document.createElement('i'),bright=i%17===0
- star.className=bright?'sky-star luminous':'sky-star'
- star.style.cssText=`left:${(random()*100).toFixed(2)}%;top:${(random()*100).toFixed(2)}%;--star-size:${bright?1.8:(.6+random()*.7).toFixed(2)}px;--star-opacity:${(.18+random()*.38).toFixed(2)};--star-delay:${(-random()*20).toFixed(1)}s;--star-duration:${(9+random()*12).toFixed(1)}s`
- sky.append(star)
-}
-document.body.prepend(sky)
+// The minimal shell keeps the terrain as the only visual: no decorative sky.
 
 const readoutToggle=document.createElement('button')
-readoutToggle.type='button';readoutToggle.className='map-readout-toggle';readoutToggle.textContent='Hide readings'
+readoutToggle.type='button';readoutToggle.className='map-readout-toggle';readoutToggle.innerHTML='<svg class="i" aria-hidden="true"><use href="#i-eye"/></svg><span>Readings</span>'
 readoutToggle.setAttribute('aria-pressed','false');readoutToggle.setAttribute('aria-label','Hide map readings')
 readoutToggle.setAttribute('aria-controls','rehearsal-hud target-labels')
 element('mission-map').append(readoutToggle)
 readoutToggle.addEventListener('click',()=>{
  const hidden=element('mission-map').classList.toggle('readouts-hidden')
- readoutToggle.textContent=hidden?'Show readings':'Hide readings'
+ readoutToggle.querySelector('span')!.textContent=hidden?'Hidden':'Readings'
  readoutToggle.setAttribute('aria-label',hidden?'Show map readings':'Hide map readings')
  readoutToggle.setAttribute('aria-pressed',String(hidden))
 })
@@ -121,7 +110,7 @@ for(const [id,help] of Object.entries({
 }))element(id).title=help
 
 const startPrompt=document.createElement('div');startPrompt.className='map-selection-prompt';startPrompt.hidden=true
-const startInstruction=document.createElement('span');startInstruction.textContent='Click the map to choose a start.'
+const startInstruction=document.createElement('span');startInstruction.textContent='Click the map to set the start.'
 const cancelStart=document.createElement('button');cancelStart.type='button';cancelStart.textContent='Cancel'
 cancelStart.addEventListener('click',()=>element('pick-start').click())
 startPrompt.append(startInstruction,cancelStart)

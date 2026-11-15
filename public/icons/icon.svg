@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="MAREKH">
+  <rect width="256" height="256" rx="56" fill="#0e1720"/>
+  <path d="M58 196 C104 190 150 72 198 74" fill="none" stroke="#e0a273" stroke-width="15" stroke-linecap="round"/>
+  <circle cx="58" cy="196" r="13" fill="#f6e2cd"/>
+  <circle cx="198" cy="74" r="13" fill="#f6e2cd"/>
+</svg>

@@ -131,3 +131,59 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,s
 a{text-underline-offset:3px}
 @media(max-width:850px){.workspace-tabs{padding:4px 0 8px}.workspace-pane{padding:16px}.workspace-pane .live-planning>div>h2{margin-bottom:20px}.view-control-group+ .view-control-group{padding-left:0;border-left:0}.mission-workspace .view-controls{gap:8px}}
 @media(max-width:850px){.workspace-pane .live-planning>div>h2{margin-bottom:16px}.workspace-pane .continuous-controls{margin-top:4px}.workspace-pane .continuous-controls input,.workspace-pane .continuous-controls select{height:40px;min-height:40px;padding-block:8px}.workspace-pane .start-coordinates summary{padding-block:4px}}
+
+/* Minimal shell: icon-led tabs, one readout, fewer numbers on screen. */
+.icon-sprite{position:absolute;width:0;height:0;overflow:hidden}
+svg.i{width:1.05em;height:1.05em;flex:0 0 auto;fill:currentColor;stroke:none;opacity:.92;vertical-align:-.16em}
+
+/* Tabs: one quiet track, one marked cell. */
+.workspace-tabs{padding:6px;gap:2px;background:#141a1e!important;border-bottom:1px solid #262e34!important}
+.workspace-tabs button{min-height:46px;padding:8px 6px;border:0!important;border-radius:7px;background:transparent!important;color:#8fa1ac;font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:7px;flex:1 1 0;white-space:nowrap}
+.workspace-tabs button svg.i{width:18px;height:18px;opacity:.7}
+.workspace-tabs button:hover{background:#1d252b!important;color:#d6dee3}
+.workspace-tabs button:hover svg.i{opacity:.95}
+.workspace-tabs button[aria-selected=true],.workspace-tabs button[aria-selected=true]:hover{background:#2b343b!important;color:#f4e9dc!important;box-shadow:inset 0 -2px #d8b38a!important}
+.workspace-tabs button[aria-selected=true] svg.i{opacity:1;color:#dcaa80}
+
+/* One readout: the segment card repeated the HUD and the profile. */
+.segment-card{display:none!important}
+.map-frame .rehearsal-hud{max-width:min(250px,calc(100% - 104px))}
+.map-frame .rehearsal-hud .hud-telemetry{grid-template-columns:repeat(3,minmax(0,1fr))}
+
+/* Table and readings: what a walker needs, nothing twice. */
+.route-comparison table th:nth-child(6),.route-comparison table td:nth-child(6){display:none!important}
+.profile-readings>div:has(#profile-temperature),.profile-readings>div:has(#profile-radiation){display:none!important}
+.profile-readings{grid-template-columns:repeat(3,minmax(0,1fr))}
+
+/* Legend keys become short labels beside their symbol. */
+.legend{font-size:11.5px;gap:8px 14px}
+.legend li{display:flex;align-items:center;gap:6px}
+
+/* Short viewports: keep the primary action reachable without hunting. */
+@media(max-height:800px){
+ .pane-plan .live-planning>div>h2{margin-bottom:10px;font-size:18px}
+ .workspace-pane .continuous-controls{gap:8px;margin:6px 0 2px}
+ .workspace-pane input,.workspace-pane select{height:40px;padding-block:6px}
+ .workspace-pane label{font-size:12.5px}
+ .workspace-pane .objective-hint{font-size:12px;line-height:1.35}
+}
+
+/* Narrow phones: tabs keep their icon, the label stays for assistive tech. */
+@media(max-width:430px){
+ .workspace-tabs button>span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+ .workspace-tabs button{gap:0}
+}
+@media(max-height:800px){
+ .pane-plan .live-planning fieldset{gap:8px}
+ .workspace-pane .continuous-controls label{gap:4px}
+ .workspace-pane .live-planning legend{margin-bottom:8px}
+ .pane-plan .live-planning>div>h2{margin:0 0 8px}
+}
+/* Map card: distance, grade, next stop. Telemetry belongs to the helmet view. */
+.map-frame .rehearsal-hud .hud-telemetry{display:none}
+.map-frame[data-mode=helmet] .rehearsal-hud .hud-telemetry{display:grid}
+#rehearsal-alert:empty{display:none}
+/* Phone: leave room for the camera controls instead of clipping them. */
+@media(max-width:850px){
+ .mission-workspace #terrain-view,.mission-workspace .map-frame[data-mode=helmet] #terrain-view{height:clamp(300px,calc(100dvh - 330px),620px)}
+}

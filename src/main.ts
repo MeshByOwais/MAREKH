@@ -42,8 +42,8 @@ try {
   descriptor=await loadMission();root=new URL(descriptor.terrain)
   document.title=`MAREKH · ${descriptor.name} Crew Planner`
   node('mission-location').textContent=`Crew planning / ${descriptor.name} / ${descriptor.region}`
-  node('home-view').textContent=descriptor.name
-  node('home-key').textContent=descriptor.context?.homeLabel??'Area outline';node('science-key').textContent=descriptor.context?.scienceLabel??'Science context';node('staging-key').textContent=descriptor.context?.stagingLabel??'Staging search area'
+  const homeView=node('home-view'),homeSpan=homeView.querySelector('span');if(homeSpan)homeSpan.textContent='Home';homeView.setAttribute('aria-label',descriptor.name);homeView.title=descriptor.name
+  node('home-key').textContent='Outline';node('home-key').title=descriptor.context?.homeLabel??'Area outline';node('science-key').textContent='Science';node('science-key').title=descriptor.context?.scienceLabel??'Science context';node('staging-key').textContent='Staging';node('staging-key').title=descriptor.context?.stagingLabel??'Staging search area'
   for(const id of ['source-review-nav','source-review-bottom']){const link=node(id) as HTMLAnchorElement;link.hidden=!descriptor.context?.reviewUrl;if(descriptor.context?.reviewUrl)link.href=descriptor.context.reviewUrl}
   node('science-stop-heading').textContent=descriptor.science.title
   const scienceCard=node('science-stop-card'),scienceImage=scienceCard.querySelector('img')!
@@ -381,6 +381,17 @@ try {
       draw()
     },
   })
+  let comparedOnce=false
+  function queueComparison(routes: DisplayRoute[]) {
+    if (comparedOnce || routes.length > 1) return
+    comparedOnce = true
+    // The saved package ships the minimax route only. Add the shorter alternative once,
+    // after the audited route has painted, so the first view carries both choices.
+    window.setTimeout(() => {
+      const button = document.getElementById('compare-continuous') as HTMLButtonElement | null
+      if (button && !button.hidden && !button.disabled) button.click()
+    }, 1500)
+  }
   async function loadRoutes(mode: 'global'|'crew'|'baseline') {
    planning.cancel('Loading the selected saved model…');const generation=++loadGeneration
    try {
@@ -445,6 +456,7 @@ try {
     validatedApproach = [endpoints.approach.eastM, endpoints.approach.northM]
     node('route-downloads').hidden = false;node('saved-review').hidden=false;node('result-kind').textContent='Saved planning result'
     planning.saved(routes,config,mode,stagingHazard)
+    if(global)queueComparison(routes)
     draw()
   } catch (error) {
     if(generation!==loadGeneration)return
