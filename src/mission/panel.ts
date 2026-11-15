@@ -1,14 +1,15 @@
 import type {Incident} from '../routing/incidents.ts'
 import {createMissionSampler,validateScenario,minutes,type Scenario,type MissionRoute,type MissionSample,type MissionTiming} from './conditions.ts'
 const node=(id:string)=>document.getElementById(id)!
-const fieldLabels:Record<Exclude<keyof Scenario,'enabled'>,string>={temperatureC:'Ground baseline · °C',spatialVariationC:'Spatial variation · ±°C / 100 m demo cells',diurnalVariationC:'Daily variation · ±°C',departureHour:'Departure · scenario hour (0–24)',pressurePa:'Regional pressure · Pa',doseRateUSvH:'Constant dose-equivalent rate · µSv/h',walkingSpeedMS:'Level-ground walking speed · m/s',gradePenalty:'Walking slowdown per absolute rise/run',samplingMinutes:'Planned science stop · min',missionBudgetMinutes:'Total mission time budget · min',reserveMinutes:'Return reserve · min',coldAlertC:'Cold-ground alert · °C or below',doseAlertUSv:'Cumulative dose alert · µSv or above'}
+const fieldLabels:Record<Exclude<keyof Scenario,'enabled'>,string>={temperatureC:'Ground baseline · °C',spatialVariationC:'Spatial variation · ±°C / 100 m demo cells',diurnalVariationC:'Daily variation · ±°C',departureHour:'Departure · scenario hour (0–24)',pressurePa:'Regional pressure · Pa',doseRateUSvH:'Constant dose-equivalent rate · µSv/h',walkingSpeedMS:'Walking speed · m/s',gradePenalty:'Slope slowdown factor',samplingMinutes:'Sampling stop · min',missionBudgetMinutes:'Total time available · min',reserveMinutes:'Return reserve · min',coldAlertC:'Cold-ground alert · °C or below',doseAlertUSv:'Cumulative dose alert · µSv or above'}
 export function createMissionPanel(initial:Scenario,hooks:{changed():void;pause():void;returnWithoutSampling():void}){
   let incidents:Incident[]=[]
   let scenario={...initial},route:MissionRoute|undefined,warning=10,sampler:ReturnType<typeof createMissionSampler>|undefined,lastDistance=0
   const form=node('scenario-form') as HTMLFormElement,fields=node('scenario-fields')
+  const advanced=document.createElement('details');advanced.className='quiet-details scenario-advanced';advanced.innerHTML='<summary>Environmental simulation & alerts</summary>';const advancedFields=document.createElement('div');advancedFields.className='scenario-fields';advanced.append(advancedFields);fields.after(advanced);const environmentalToggle=form.querySelector('label');if(environmentalToggle)advanced.insertBefore(environmentalToggle,advancedFields)
   for(const key of Object.keys(fieldLabels) as (keyof typeof fieldLabels)[]){
     const label=document.createElement('label');label.textContent=fieldLabels[key]
-    const input=document.createElement('input');input.type='number';input.step='any';input.id=`scenario-${key}`;input.name=key;input.required=true;input.value=String(scenario[key]);label.append(input);fields.append(label)
+    const input=document.createElement('input');input.type='number';input.step='any';input.id=`scenario-${key}`;input.name=key;input.required=true;input.value=String(scenario[key]);label.append(input);(new Set<string>(['walkingSpeedMS','samplingMinutes','missionBudgetMinutes','reserveMinutes']).has(key)?fields:advancedFields).append(label)
   }
   ;(node('scenario-enabled') as HTMLInputElement).checked=scenario.enabled
   function syncInputs(){for(const key of Object.keys(fieldLabels) as (keyof typeof fieldLabels)[])(node(`scenario-${key}`) as HTMLInputElement).value=String(scenario[key])}

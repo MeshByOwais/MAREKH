@@ -356,7 +356,7 @@ try {
     mode(mode){
       if(mode!=='briefing'&&!briefingPose)briefingPose={position:camera.position.clone(),target:controls.target.clone()}
       controls.enabled=mode==='briefing'
-      node('view-help').textContent=mode==='briefing'?'Drag to pan · Right-drag to orbit · Scroll to zoom':'Use the distance controls below · Escape returns to Briefing'
+      node('view-help').textContent=mode==='briefing'?'Drag to pan · Right-drag to orbit · Scroll to zoom':'Use the distance controls below · Escape returns to the map'
       for(const marker of contextMarkers){marker.visible=mode!=='helmet';marker.scale.setScalar(1)}
       node('visor-frame').hidden=mode!=='helmet';node('mission-map').dataset.mode=mode
       for(const child of routeGroup.children){
@@ -415,7 +415,8 @@ try {
     if(generation!==loadGeneration)return
     renderRoutes(routes,endpoints,mode)
     const totalEdges = audit.routes.reduce((sum: number, r: { checkedEdges: number }) => sum + r.checkedEdges, 0)
-    node('route-status').textContent = `Verified · ${totalEdges} ${crew?'native pieces':'edges'} checked independently · outbound and return · ${packageManifest.routeVersion}`
+    node('route-status').textContent = 'Route checked for the trip out and back.'
+    node('route-status').title = `${totalEdges} ${crew?'native pieces':'edges'} checked independently · ${packageManifest.routeVersion}`
     node('live-bounds').hidden=true
     node('optimality-bounds').hidden=!global
     if(bounds){

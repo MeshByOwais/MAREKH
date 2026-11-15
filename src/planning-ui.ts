@@ -29,7 +29,7 @@ export function createPlanningUI(grid:Grid, hooks:{
   function message(text:string,state='idle') {
     status.textContent=text;status.dataset.state=state
     const summary=node('route-placement-status');summary.hidden=false;summary.dataset.state=state
-    summary.textContent=activeStart?`Displayed route start: ${activeStart.row}, ${activeStart.column}. ${text}`:text
+    summary.textContent=text
   }
   function candidate() {
     const row=Number(input('start-row').value),column=Number(input('start-column').value)
@@ -46,7 +46,7 @@ export function createPlanningUI(grid:Grid, hooks:{
     }catch(error){
       hooks.candidate(Number.isInteger(p.row)&&Number.isInteger(p.column)?p:undefined,false,config.staging.footprintWidthM,config.staging.footprintHeightM)
       input('start-row').setAttribute('aria-invalid','true');input('start-column').setAttribute('aria-invalid','true')
-      message(`New start not applied. ${error instanceof Error?error.message:'Invalid staging.'} Choose another cell or Find nearby valid staging. The displayed route is unchanged.`,'invalid')
+      message(`New start not applied. ${error instanceof Error?error.message:'Invalid staging.'} Choose another start or use Find nearby start. The displayed route is unchanged.`,'invalid')
       return false
     }
   }
@@ -106,14 +106,14 @@ export function createPlanningUI(grid:Grid, hooks:{
     ;(node('route-objective') as HTMLSelectElement).disabled=mode!=='global'
     input('distance-budget').disabled=mode!=='global'
     node('plan-submit').textContent=mode==='global'?'Plan route':'Plan both routes';node('compare-continuous').hidden=mode!=='global';(node('compare-dropoffs') as HTMLButtonElement).disabled=mode!=='global'
-    node('live-start-help').textContent=mode==='global'?'Choose staging and a distance–grade trade-off. This local planner searches native triangle crossings and improves them continuously, using the same system as the saved grade route. Searches can take several minutes. Both legs count toward the distance limit.':'Pick a cell or enter its row and column. The full 10 × 10 m staging square must pass the 5° limit. Find nearby valid staging proposes a passing square within 100 m. Choose Plan both routes to apply it.'
+    node('live-start-help').textContent=mode==='global'?'Choose staging and a distance–grade trade-off. This local planner searches native triangle crossings and improves them continuously, using the same system as the saved grade route. Searches can take several minutes. Both legs count toward the distance limit.':'Pick a cell or enter its row and column. The full 10 × 10 m staging square must pass the 5° limit. Find nearby valid staging proposes a passing square within 100 m. Choose Plan route to apply it.'
     refreshObjective()
   }
   function refreshObjective(){
     const objective=(node('route-objective') as HTMLSelectElement).value
     input('grade-limit').disabled=mode!=='global'
-    node('grade-limit-label').textContent='Peak grade · °'
-    node('objective-help').textContent=objective==='gentlest'?'Seek the lowest peak walking grade within your total distance budget, then shorten that candidate. Average grade is reported separately. Calculate both options also uses the peak cap for the shorter candidate.':'Seek a short route whose every native piece stays below the chosen walking-grade cap. The total distance limit is also enforced; increase it to allow longer detours.'
+    node('grade-limit-label').textContent='Steepness limit · °'
+    node('objective-help').textContent=objective==='gentlest'?'Find the least-steep walk within your distance limit. Finding both options also uses the steepness limit for the shorter route.':'Find a short walk that stays within both limits. Steepness means the steepest section, not the average.'
   }
   function applyPlan(plan:LivePlan,planConfig:PlanningConfig,record:unknown){
     for(const route of plan.routes as InspectableRoute[]){delete route.samplingSpentMinutes;delete route.scienceMinutes;delete route.completedDistanceM}
@@ -198,13 +198,13 @@ export function createPlanningUI(grid:Grid, hooks:{
   form.addEventListener('submit',event=>{event.preventDefault();submitSearch()})
   node('compare-continuous').addEventListener('click',()=>{if(form.reportValidity())submitSearch(true)})
   node('cancel-search').addEventListener('click',()=>cancel('Search cancelled. The current plan is retained.'))
-  node('pick-start').addEventListener('click',()=>{picking=!picking;node('pick-start').setAttribute('aria-pressed',String(picking));message(picking?'Click the terrain to select and check a staging square.':'Map clicks inspect terrain.')})
+  node('pick-start').addEventListener('click',()=>{picking=!picking;node('pick-start').setAttribute('aria-pressed',String(picking));message(picking?'Click the map to choose a start.':'Start selection stopped. Click the map to inspect terrain.')})
   node('find-staging').addEventListener('click',()=>{
     if(!config)return
     cancel();const requested=candidate()
     try{
       const nearby=findNearbyStaging(grid,config,requested,stagingHazard)
-      if(!nearby){message('No passing staging square found within 100 m. Try another part of the map. The displayed route is unchanged.','invalid');return}
+      if(!nearby){message('No valid start found within 100 m. Choose another area. Your route is unchanged.','invalid');return}
       const p=nearby.footprint.cell
       picking=false;node('pick-start').setAttribute('aria-pressed','false');input('start-row').value=String(p.row);input('start-column').value=String(p.column)
       previewCandidate();message(`Suggested staging ${p.row}, ${p.column}, ${nearby.displacementM.toFixed(2)} m from ${requested.row}, ${requested.column}. The full square passes staging checks. Choose Plan route to apply this location; route connectivity will be checked next.`,'ready')
@@ -251,15 +251,14 @@ export function createPlanningUI(grid:Grid, hooks:{
       const card=document.createElement('article'),title=document.createElement('h3');title.textContent=choice.kind==='science'?'Detour to science, then rover':'Return to rover now';card.append(title)
       const detail=document.createElement('p')
       if(!choice.route){detail.textContent=choice.error??'No checked route found.';card.append(detail);host.append(card);continue}
-      const t=mission.summary(choice.route),old=mission.timing!,elapsed=t.elapsedAt(distance),fits=t.totalS/60+mission.scenario.reserveMinutes<=mission.scenario.missionBudgetMinutes
       const remainingPeak=profilePoints(choice.route).filter(p=>p.cumulativeDistanceM>distance).reduce((n,p)=>Math.max(n,Math.abs(p.segmentGradeDeg)),0)
-      detail.textContent=`${(choice.route.metrics.distanceM-distance).toFixed(1)} m remaining · ${minutes(Math.max(0,t.totalS-elapsed))} including future stops · ${remainingPeak.toFixed(2)}° peak ahead. Mission change ${(t.totalS-old.totalS)/60>=0?'+':''}${((t.totalS-old.totalS)/60).toFixed(1)} min. Maximum science allowance ${t.availableSamplingMinutes.toFixed(1)} min. ${fits?'Fits time budget and reserve.':'Exceeds time budget or reserve; revise the scenario or sampling allowance.'}`
+      detail.textContent=`${(choice.route.metrics.distanceM-distance).toFixed(1)} m remaining · ${remainingPeak.toFixed(2)}° steepest section ahead.`
       card.append(detail)
-      const button=document.createElement('button');button.textContent=choice.kind==='science'?'Use science detour':'Use return route';button.disabled=!fits
+      const button=document.createElement('button');button.textContent=choice.kind==='science'?'Use science detour':'Use return route'
       button.addEventListener('click',()=>{
         if(!choice.route)return
         hooks.pause();incidentDirty=false;hooks.routesUpdated([choice.route]);setRoutes([choice.route]);updateCursor(choice.route.completedDistanceM??distance)
-        node('incident-status').textContent=`${choice.route.name} selected. Completed travel and time are preserved. All future pieces passed the current incident and crew checks.`
+        node('incident-status').textContent=`${choice.route.name} selected. Completed travel is preserved. All future pieces passed the current incident and crew checks.`
         node('selected-route-proof').textContent='Incident repair: checked Field D* crew route, not the continuous optimizer. No continuous global bound or independent source audit.'
         node('incident-results').replaceChildren();incidentChoices=[]
       });card.append(button);host.append(card)
@@ -329,6 +328,6 @@ export function createPlanningUI(grid:Grid, hooks:{
       if(best>toleranceM)return false;hooks.pause();updateCursor(bestDistance);return true
     },
     chooseCell(cell:Cell){if(!picking)return false;cancel();picking=false;node('pick-start').setAttribute('aria-pressed','false');input('start-row').value=String(cell.row);input('start-column').value=String(cell.column);previewCandidate();return true},
-    saved(next:InspectableRoute[],nextConfig:PlanningConfig,nextMode:typeof mode,hazard?:Uint8Array){cancel();resetIncidents(false);cacheKey='';continuousCache=[];lastRecord={status:'saved-package',independentAudit:true,navigationModel:nextMode};config=nextConfig;mode=nextMode;stagingHazard=hazard;activeStart={...config.staging.cell};input('start-row').value=String(activeStart.row);input('start-column').value=String(activeStart.column);input('start-row').setAttribute('aria-invalid','false');input('start-column').setAttribute('aria-invalid','false');node('live-download').hidden=true;hooks.candidate(undefined);refreshMode();setRoutes(next);message(mode==='global'?'Saved grade candidate loaded. Its bounds apply to this staging point.':'Saved plan loaded. Choose another staging cell to try a new walk.','current')},
+    saved(next:InspectableRoute[],nextConfig:PlanningConfig,nextMode:typeof mode,hazard?:Uint8Array){cancel();resetIncidents(false);cacheKey='';continuousCache=[];lastRecord={status:'saved-package',independentAudit:true,navigationModel:nextMode};config=nextConfig;mode=nextMode;stagingHazard=hazard;activeStart={...config.staging.cell};input('start-row').value=String(activeStart.row);input('start-column').value=String(activeStart.column);input('start-row').setAttribute('aria-invalid','false');input('start-column').setAttribute('aria-invalid','false');node('live-download').hidden=true;hooks.candidate(undefined);refreshMode();setRoutes(next);message(mode==='global'?'Saved route ready. Choose a different start to plan a new walk.':'Saved route ready. Choose a different start to plan a new walk.','current')},
   }
 }

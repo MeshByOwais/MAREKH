@@ -6,10 +6,10 @@ const sidebar=document.createElement('section');sidebar.className='workspace-sid
 const dashboard=document.createElement('div');dashboard.className='mission-workspace'
 const tabs=document.createElement('div');tabs.className='workspace-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Workspace sections')
 const panes=document.createElement('div');panes.className='workspace-panes'
-const sections=[['plan','Plan'],['routes','Routes'],['rehearse','Rehearse'],['conditions','Conditions'],['more','Mission']] as const
+const sections=[['plan','Plan'],['routes','Routes'],['rehearse','Preview'],['conditions','Time'],['more','More']] as const
 const panels=new Map<string,HTMLElement>()
 for(const [id,label] of sections){
- const button=document.createElement('button');button.id=`tab-${id}`;button.type='button';button.textContent=label;button.setAttribute('role','tab');button.setAttribute('aria-controls',`pane-${id}`)
+ const button=document.createElement('button');button.id=`tab-${id}`;button.type='button';button.textContent=label;button.setAttribute('role','tab');button.setAttribute('aria-controls',`pane-${id}`);if(id==='conditions')button.hidden=true
  const panel=document.createElement('div');panel.id=`pane-${id}`;panel.className='workspace-pane';panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby',button.id);panel.tabIndex=0
  tabs.append(button);panes.append(panel);panels.set(id,panel)
 }
@@ -23,10 +23,11 @@ sidebar.append(tabs,panes);dashboard.append(sidebar,scene);main.prepend(dashboar
 for(const [id] of sections)document.getElementById(`tab-${id}`)!.addEventListener('click',()=>showWorkspaceTab(id))
 tabs.addEventListener('keydown',event=>{
  if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return
- const buttons=sections.map(([id])=>document.getElementById(`tab-${id}`)!)
+ const visibleSections=sections.filter(([id])=>id!=='conditions')
+ const buttons=visibleSections.map(([id])=>document.getElementById(`tab-${id}`)!)
  const index=buttons.indexOf(document.activeElement as HTMLElement);if(index<0)return
  event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?buttons.length-1:(index+(event.key==='ArrowRight'?1:-1)+buttons.length)%buttons.length
- showWorkspaceTab(sections[next][0]);buttons[next].focus()
+ showWorkspaceTab(visibleSections[next][0]);buttons[next].focus()
 })
 function move(selector:string,pane:string){const node=document.querySelector(selector);if(node)panels.get(pane)!.append(node)}
 move('.live-planning','plan');move('.incident-panel','rehearse');move('#rehearsal-panel','rehearse')
@@ -36,11 +37,25 @@ for(const node of Array.from(main.querySelectorAll(':scope > details')))panels.g
 const inspect=scene.querySelector('aside > details');if(inspect)panels.get('more')!.append(inspect)
 scene.querySelector('aside')?.remove()
 const strip=document.querySelector('.mission-strip');if(strip)terrain.prepend(strip)
+const extraTimes=document.createElement('div');extraTimes.className='extra-times'
+if(strip)for(const card of Array.from(strip.children).slice(2))extraTimes.append(card)
+panels.get('conditions')!.prepend(extraTimes)
+const coordinateDetails=document.createElement('details');coordinateDetails.className='quiet-details start-coordinates'
+const coordinateSummary=document.createElement('summary');coordinateSummary.textContent='Enter grid coordinates instead'
+const coordinates=document.createElement('div');coordinates.className='coordinate-fields'
+for(const id of ['start-row','start-column'])coordinates.append(document.getElementById(id)!.closest('label')!)
+coordinateDetails.append(coordinateSummary,coordinates)
+document.getElementById('find-staging')!.after(coordinateDetails)
+const sourceLink=document.getElementById('source-review-nav');if(sourceLink)panels.get('more')!.append(sourceLink)
+
 for(const id of ['mission-turnback','mission-decision']){const node=document.getElementById(id);if(node)panels.get('conditions')!.prepend(node)}
 const rehearsalPanel=document.getElementById('rehearsal-panel')!;panels.get('rehearse')!.prepend(rehearsalPanel)
 const scenario=document.getElementById('scenario-settings') as HTMLDetailsElement;scenario.open=true
 showWorkspaceTab('plan')
-function showMap(){dashboard.dataset.mobileView='map';mapTab.setAttribute('aria-pressed','true')}
+function showMap(){
+ dashboard.dataset.mobileView='map';mapTab.setAttribute('aria-pressed','true')
+ if(matchMedia('(max-width: 850px)').matches)for(const [id] of sections)document.getElementById(`tab-${id}`)!.setAttribute('aria-selected','false')
+}
 mapTab.addEventListener('click',showMap)
 if(matchMedia('(max-width: 850px)').matches)showMap()
 for(const id of ['pick-start','incident-pick'])document.getElementById(id)!.addEventListener('click',showMap)
@@ -52,11 +67,10 @@ const map=()=>element('mission-map').scrollIntoView({behavior:matchMedia('(prefe
 element('explore-map').addEventListener('click',map)
 element('launch-helmet').addEventListener('click',()=>{element('mode-helmet').click();map()})
 element('jump-science').addEventListener('click',()=>{element('go-turnaround').click();map()})
-element('mars-globe').addEventListener('click',()=>{element('mars-globe').classList.toggle('spinning')})
 element('focus-workspace').addEventListener('click',()=>{
  const focused=document.body.classList.toggle('workspace-focus')
  element('focus-workspace').setAttribute('aria-pressed',String(focused))
- element('focus-workspace').textContent=focused?'Exit focus ↙':'Focus mode ↗'
+ element('focus-workspace').textContent=focused?'Exit focus':'Focus mode'
  if(focused)map()
 })
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&document.body.classList.contains('workspace-focus'))element('focus-workspace').click()})
@@ -81,42 +95,6 @@ for(let i=0;i<95;i++){
 }
 document.body.prepend(sky)
 
-// Delegation also covers route and incident actions created after a new search.
-document.addEventListener('click',event=>{
- if(matchMedia('(prefers-reduced-motion: reduce)').matches)return
- const target=event.target instanceof Element?event.target.closest<HTMLButtonElement>('button.primary'):null
- if(!target||target.disabled||target.closest('fieldset:disabled')||target.id==='mars-globe')return
- const box=target.getBoundingClientRect(),wave=document.createElement('span')
- wave.className='click-wave';wave.setAttribute('aria-hidden','true')
- wave.style.left=`${event.detail?(event as MouseEvent).clientX-box.left:box.width/2}px`
- wave.style.top=`${event.detail?(event as MouseEvent).clientY-box.top:box.height/2}px`
- target.append(wave)
- wave.addEventListener('animationend',()=>wave.remove(),{once:true})
- setTimeout(()=>wave.remove(),700)
-})
-
-// One occasional supply run; decorative and never an obstacle to map interaction.
-const rocket=document.createElement('div')
-rocket.className='supply-rocket';rocket.setAttribute('aria-hidden','true')
-rocket.innerHTML=`<svg viewBox="0 0 160 64" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="rocket-metal" x2="0" y2="1"><stop stop-color="#e2e7e8"/><stop offset="1" stop-color="#94a7b3"/></linearGradient><linearGradient id="rocket-flame"><stop stop-color="#f0a05b" stop-opacity="0"/><stop offset=".75" stop-color="#efb775"/><stop offset="1" stop-color="#ffe3b5"/></linearGradient></defs><path class="rocket-flame" d="M4 32Q25 19 59 26L59 38Q26 45 4 32" fill="url(#rocket-flame)"/><path d="M59 24L49 10L79 17M59 40L49 54L79 47" fill="#c77b51"/><path d="M54 24Q105 6 139 32Q105 58 54 40Z" fill="url(#rocket-metal)"/><path d="M118 21Q131 24 139 32Q131 40 118 43Z" fill="#d5895c"/><circle cx="98" cy="32" r="9" fill="#283f50" stroke="#7897a6" stroke-width="3"/><path d="M94 28L100 26" stroke="#c5dce5" stroke-width="2" stroke-linecap="round"/><path d="M57 26L57 38" stroke="#526b79" stroke-width="5"/></svg><span class="rocket-caption">Important cargo: snacks.</span>`
-document.body.append(rocket)
-let rocketFlying=false,lastFlight=-20000,scrollTravel=0,lastScroll=scrollY
-function launchSupply(){
- if(rocketFlying)return
- if(matchMedia('(prefers-reduced-motion: reduce)').matches){
-  const button=element('launch-rocket');button.textContent='✓ Snacks dispatched'
-  setTimeout(()=>{button.textContent='↗ Send snacks to Mars'},2400);return
- }
- rocketFlying=true;lastFlight=Date.now();rocket.classList.add('in-flight')
- element('launch-rocket').setAttribute('aria-pressed','true')
-}
-rocket.addEventListener('animationend',event=>{if(event.target!==rocket)return;rocket.classList.remove('in-flight');rocketFlying=false;element('launch-rocket').setAttribute('aria-pressed','false')})
-element('launch-rocket').addEventListener('click',launchSupply)
-window.addEventListener('scroll',()=>{
- scrollTravel+=Math.abs(scrollY-lastScroll);lastScroll=scrollY
- if(scrollTravel>650&&Date.now()-lastFlight>18000&&element('mission-map').dataset.mode!=='helmet'&&element('mission-map').dataset.mode!=='flyover'&&!document.body.classList.contains('workspace-focus')&&!matchMedia('(prefers-reduced-motion: reduce)').matches){scrollTravel=0;launchSupply()}
-},{passive:true})
-
 const readoutToggle=document.createElement('button')
 readoutToggle.type='button';readoutToggle.className='map-readout-toggle';readoutToggle.textContent='Hide readings'
 readoutToggle.setAttribute('aria-pressed','false');readoutToggle.setAttribute('aria-label','Hide map readings')
@@ -128,3 +106,35 @@ readoutToggle.addEventListener('click',()=>{
  readoutToggle.setAttribute('aria-label',hidden?'Show map readings':'Hide map readings')
  readoutToggle.setAttribute('aria-pressed',String(hidden))
 })
+
+for(const [id,help] of Object.entries({
+ 'pick-start':'Click a spot on the map to set the rover starting location.',
+ 'find-staging':'Find a nearby starting location that passes the terrain checks.',
+ 'compare-continuous':'Calculate both an easier route and a shorter route.',
+ 'mode-briefing':'Move around the map and inspect the route.',
+ 'mode-flyover':'Follow the route from above.',
+ 'mode-helmet':'Preview the walk at crew eye level.',
+ 'map-pan':'Drag to move across the ground.',
+ 'map-orbit':'Drag to rotate the camera around the terrain.',
+ 'export-mission':'Save the route, settings and current progress as a file.'
+}))element(id).title=help
+
+const startPrompt=document.createElement('div');startPrompt.className='map-selection-prompt';startPrompt.hidden=true
+const startInstruction=document.createElement('span');startInstruction.textContent='Click the map to choose a start.'
+const cancelStart=document.createElement('button');cancelStart.type='button';cancelStart.textContent='Cancel'
+cancelStart.addEventListener('click',()=>element('pick-start').click())
+startPrompt.append(startInstruction,cancelStart)
+element('rehearsal-view-controls').before(startPrompt)
+const syncStartPrompt=()=>{startPrompt.hidden=element('pick-start').getAttribute('aria-pressed')!=='true'}
+new MutationObserver(syncStartPrompt).observe(element('pick-start'),{attributes:true,attributeFilter:['aria-pressed']})
+syncStartPrompt()
+
+// Export remains available after removing the time-settings tab.
+panels.get('more')!.prepend(element('export-mission'))
+
+const legendList=document.querySelector('.legend')!
+const legendPanel=legendList.parentElement!
+const dataChecks=document.createElement('details');dataChecks.className='quiet-details'
+const dataSummary=document.createElement('summary');dataSummary.textContent='Data checks';dataChecks.append(dataSummary)
+for(const child of Array.from(legendPanel.children))if(child!==legendList&&child.tagName!=='SUMMARY')dataChecks.append(child)
+legendPanel.append(dataChecks)
