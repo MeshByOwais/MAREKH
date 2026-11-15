@@ -13,10 +13,10 @@ for(const [id,label] of sections){
  const panel=document.createElement('div');panel.id=`pane-${id}`;panel.className='workspace-pane';panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby',button.id);panel.tabIndex=0
  tabs.append(button);panes.append(panel);panels.set(id,panel)
 }
-const mapTab=document.createElement('button');mapTab.type='button';mapTab.className='mobile-map-tab';mapTab.textContent='Map';mapTab.setAttribute('aria-label','Show terrain map');tabs.prepend(mapTab)
+const mapTab=document.createElement('button');mapTab.type='button';mapTab.className='mobile-map-tab';mapTab.textContent='Map';mapTab.setAttribute('aria-label','Show terrain map');mapTab.setAttribute('role','tab');mapTab.setAttribute('aria-controls','terrain-panel');scene.id='terrain-panel';tabs.prepend(mapTab)
 function showWorkspaceTab(id:string){
  for(const [key,panel] of panels){panel.hidden=key!==id;const button=document.getElementById(`tab-${key}`)!;button.setAttribute('aria-selected',String(key===id));button.tabIndex=key===id?0:-1}
- dashboard.dataset.mobileView='tools';mapTab.setAttribute('aria-pressed','false')
+ dashboard.dataset.mobileView='tools';mapTab.setAttribute('aria-pressed','false');mapTab.setAttribute('aria-selected','false');mapTab.tabIndex=-1
 }
 // Bind after attachment so tab state can use stable document IDs.
 sidebar.append(tabs,panes);dashboard.append(sidebar,scene);main.prepend(dashboard)
@@ -25,9 +25,10 @@ tabs.addEventListener('keydown',event=>{
  if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return
  const visibleSections=sections.filter(([id])=>id!=='conditions')
  const buttons=visibleSections.map(([id])=>document.getElementById(`tab-${id}`)!)
+ if(matchMedia('(max-width: 850px)').matches)buttons.unshift(mapTab)
  const index=buttons.indexOf(document.activeElement as HTMLElement);if(index<0)return
  event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?buttons.length-1:(index+(event.key==='ArrowRight'?1:-1)+buttons.length)%buttons.length
- showWorkspaceTab(visibleSections[next][0]);buttons[next].focus()
+ if(buttons[next]===mapTab)showMap();else showWorkspaceTab(buttons[next].id.replace('tab-',''));buttons[next].focus()
 })
 function move(selector:string,pane:string){const node=document.querySelector(selector);if(node)panels.get(pane)!.append(node)}
 move('.live-planning','plan');move('.incident-panel','rehearse');move('#rehearsal-panel','rehearse')
@@ -53,8 +54,8 @@ const rehearsalPanel=document.getElementById('rehearsal-panel')!;panels.get('reh
 const scenario=document.getElementById('scenario-settings') as HTMLDetailsElement;scenario.open=true
 showWorkspaceTab('plan')
 function showMap(){
- dashboard.dataset.mobileView='map';mapTab.setAttribute('aria-pressed','true')
- if(matchMedia('(max-width: 850px)').matches)for(const [id] of sections)document.getElementById(`tab-${id}`)!.setAttribute('aria-selected','false')
+ dashboard.dataset.mobileView='map';mapTab.setAttribute('aria-pressed','true');mapTab.setAttribute('aria-selected','true');mapTab.tabIndex=0
+ if(matchMedia('(max-width: 850px)').matches)for(const [id] of sections){const button=document.getElementById(`tab-${id}`)!;button.setAttribute('aria-selected','false');button.tabIndex=-1}
 }
 mapTab.addEventListener('click',showMap)
 if(matchMedia('(max-width: 850px)').matches)showMap()
@@ -129,8 +130,7 @@ const syncStartPrompt=()=>{startPrompt.hidden=element('pick-start').getAttribute
 new MutationObserver(syncStartPrompt).observe(element('pick-start'),{attributes:true,attributeFilter:['aria-pressed']})
 syncStartPrompt()
 
-// Export remains available after removing the time-settings tab.
-panels.get('more')!.prepend(element('export-mission'))
+// Retain hidden integration hooks without exposing the retired export action.
 
 const legendList=document.querySelector('.legend')!
 const legendPanel=legendList.parentElement!
@@ -138,3 +138,20 @@ const dataChecks=document.createElement('details');dataChecks.className='quiet-d
 const dataSummary=document.createElement('summary');dataSummary.textContent='Data checks';dataChecks.append(dataSummary)
 for(const child of Array.from(legendPanel.children))if(child!==legendList&&child.tagName!=='SUMMARY')dataChecks.append(child)
 legendPanel.append(dataChecks)
+
+// Group camera manipulation separately from framing shortcuts.
+const cameraControls=document.querySelector('.view-controls')!
+for(const [label,ids] of [
+ ['Drag mode',['map-pan','map-orbit']],
+ ['Frame terrain',['home-view','route-view','full-view','north-view']]
+] as const){
+ const group=document.createElement('div');group.className='view-control-group';group.setAttribute('role','group');group.setAttribute('aria-label',label)
+ for(const id of ids)group.append(element(id))
+ cameraControls.append(group)
+}
+// Keep the active tool reachable when the workspace crosses its mobile breakpoint.
+matchMedia('(max-width: 850px)').addEventListener('change',event=>{
+ const selected=[...panels].find(([,panel])=>!panel.hidden)?.[0]||'plan'
+ if(event.matches&&dashboard.dataset.mobileView==='map')showMap()
+ else showWorkspaceTab(selected)
+})

@@ -52,7 +52,7 @@ export function createPlanningUI(grid:Grid, hooks:{
   }
   function stop() {worker?.terminate();worker=undefined;if(timer)clearTimeout(timer);timer=undefined;if(continuousJob){void fetch(`/api/plans/${continuousJob}`,{method:'DELETE'}).catch(()=>{});continuousJob=undefined}node('cancel-search').hidden=true;form.removeAttribute('aria-busy')}
   function cancel(text?:string) {generation.next();stop();if(text)message(text)}
-  function label(route:InspectableRoute) {return route.name?route.name:route.policy==='shortest-peak'?'Shorter · peak-grade limit':route.policy==='shortest'?'Shortest':route.policy==='gentle'?'Gentler terrain':route.policy==='distance'?'Distance priority':route.policy==='terrain'?'Terrain priority':'Gentler · distance limit'}
+  function label(route:InspectableRoute) {return route.name?route.name:route.policy==='shortest-peak'?'Shorter distance':route.policy==='shortest'?'Shortest':route.policy==='gentle'?'Gentler terrain':route.policy==='distance'?'Distance priority':route.policy==='terrain'?'Terrain priority':'Easier walking'}
   function updateCursor(value:number) {
     const route=routes[selected];if(!route)return
     if(Math.abs(value-distance)>1e-6&&(incidentWorker||incidentChoices.length)){stopIncident();incidentChoices=[];node('incident-results').replaceChildren();node('incident-status').textContent='Position changed. Recompute detour / return for this position.'}
@@ -112,8 +112,8 @@ export function createPlanningUI(grid:Grid, hooks:{
   function refreshObjective(){
     const objective=(node('route-objective') as HTMLSelectElement).value
     input('grade-limit').disabled=mode!=='global'
-    node('grade-limit-label').textContent='Steepness limit · °'
-    node('objective-help').textContent=objective==='gentlest'?'Find the least-steep walk within your distance limit. Finding both options also uses the steepness limit for the shorter route.':'Find a short walk that stays within both limits. Steepness means the steepest section, not the average.'
+    node('grade-limit-label').textContent='Steepest section · °'
+    node('objective-help').textContent=objective==='gentlest'?'Minimize the steepest section within your round-trip limit. The section limit applies when finding both options.':'Minimize distance within both limits. The section limit includes uphill and downhill.'
   }
   function applyPlan(plan:LivePlan,planConfig:PlanningConfig,record:unknown){
     for(const route of plan.routes as InspectableRoute[]){delete route.samplingSpentMinutes;delete route.scienceMinutes;delete route.completedDistanceM}
