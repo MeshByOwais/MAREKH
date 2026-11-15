@@ -36,7 +36,8 @@ int main(int argc,char**argv){try{
         vector<int> edge;Point p=vertices[a],q=vertices[b];
         double lo=min(p.z,q.z),hi=max(p.z,q.z);
         // Elevation portals preserve contour crossings across shared triangles.
-        if(hi-lo>1e-12)for(int64_t j=int64_t(ceil(lo/step));j<=int64_t(floor(hi/step));j++){
+    if(hi-lo>1e-12)for(int64_t j=int64_t(ceil(lo/step));j<=int64_t(floor(hi/step));j++){
+          if(nodes.size()>=4500000)throw runtime_error("Portal resource limit reached; reduce the distance search area. Continuous infeasibility is not established");
           double t=(j*step-p.z)/(q.z-p.z);if(t<1e-8||t>1-1e-8)continue;
           edge.push_back(nodes.size());nodes.push_back({{p.r+t*(q.r-p.r),p.c+t*(q.c-p.c),p.z+t*(q.z-p.z)}, {}});
         }
@@ -77,8 +78,14 @@ int main(int argc,char**argv){try{
     }
     return false;
   };
-  double low=0,high=20;if(!search(high))throw runtime_error("No budget-feasible portal witness at hard grade limit");
-  while(high-low>.001){double mid=(low+high)/2;bool ok=search(mid);cerr<<setprecision(9)<<mid<<" deg: "<<(ok?dist[goal]:-1)<<" m, "<<expanded<<" expanded\n";if(ok)high=mid;else low=mid;}
+  // Optional fixed cap uses the same admissible A* and minimizes 3D length.
+  // A graph failure is not proof of continuous infeasibility.
+  bool fixed=argc>3&&string(argv[3])=="shortest";
+  double low=0,high=argc>4?stod(argv[4]):20;
+  double tolerance=argc>5?stod(argv[5]):.001;
+  if(!(high>0&&high<=20&&tolerance>0))throw runtime_error("Invalid grade cap or tolerance");
+  if(!search(high))throw runtime_error("No budget-feasible portal witness at the requested grade limit; continuous infeasibility is not established");
+  while(!fixed&&high-low>tolerance){double mid=(low+high)/2;bool ok=search(mid);cerr<<setprecision(9)<<mid<<" deg: "<<(ok?dist[goal]:-1)<<" m, "<<expanded<<" expanded\n";if(ok)high=mid;else low=mid;}
   if(!search(high))throw runtime_error("Failed to repeat upper witness");
   vector<int> path;for(int i=goal;i!=-1;i=parent[i])path.push_back(i);reverse(path.begin(),path.end());
   ofstream out(dir+"/witness.json");out<<setprecision(17)<<"{\"needsGradeRealization\":"<<"false"<<",\"gradeCapDeg\":"<<high<<",\"oneWayDistanceM\":"<<dist[goal]<<",\"portalElevationStepM\":"<<step<<",\"portalCount\":"<<nodes.size()<<",\"faceCount\":"<<faces.size()<<",\"expanded\":"<<expanded<<",\"points\":[";

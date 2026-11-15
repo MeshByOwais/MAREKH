@@ -53,13 +53,15 @@ def domain_bounds(start, goal, spacing, one_way_budget, shape):
     mid = (np.asarray(start)+goal)/2
     lo = np.floor(mid-radii).astype(int)-1
     hi = np.ceil(mid+radii).astype(int)+1
-    if np.any(lo < 0) or np.any(hi >= shape):
-        raise ValueError('Budget domain reaches map boundary; extend domain implementation')
+    # Terrain outside the supplied map is unavailable, so clipping preserves
+    # every eligible path on this map, including boundary-adjacent requests.
+    lo = np.maximum(lo, 0)
+    hi = np.minimum(hi, np.asarray(shape)-1)
     return [int(lo[0]), int(hi[0]), int(lo[1]), int(hi[1])]
 
 
-def build_mesh():
-    m, crew, config, z, blocked = load_inputs()
+def build_mesh(inputs=None, work=WORK, upper_only=False):
+    m, crew, config, z, blocked = inputs or load_inputs()
     start = [crew['staging']['cell'][k] for k in ['row', 'column']]
     goal = [crew['approach']['cell'][k] for k in ['row', 'column']]
     bounds = domain_bounds(start, goal, m['transform'][1], config['roundTripBudgetM']/2, z.shape)
@@ -72,42 +74,47 @@ def build_mesh():
     # Keep the lower-bound mesh complete: dropping hazards is a relaxation and
     # makes every real feasible path eligible. Never alter source elevations.
     faces = np.concatenate([np.column_stack([a,b,c]), np.column_stack([d,c,b])]).astype('<i4')
-    assert np.isfinite(points[:,2]).all(), 'Bound domain contains unknown elevation'
+    if not upper_only:
+        assert np.isfinite(points[:,2]).all(), 'Bound domain contains unknown elevation'
     # Upper witnesses use only squares whose four native cells pass clearance.
     free = ~blocked[r0:r1+1,c0:c1+1]
     ok = (free[:-1,:-1]&free[:-1,1:]&free[1:,:-1]&free[1:,1:]).ravel()
     upper_faces = faces[np.tile(ok,2)]
-    WORK.mkdir(parents=True, exist_ok=True)
-    points.astype('<f8').tofile(WORK/'vertices.f64')
-    faces.tofile(WORK/'lower-faces.i32')
-    upper_faces.tofile(WORK/'upper-faces.i32')
-    upper_faces.tofile(WORK/'upper-faces-all.i32')
-    record = dict(bounds=bounds, vertexCount=len(points), lowerFaceCount=len(faces), upperFaceCount=len(upper_faces),
+    assert np.isfinite(points[upper_faces,2]).all(), 'A witness face contains unknown elevation'
+    # Live jobs use endpoint-based lower bounds and need no complete lower
+    # mesh. Unknown vertices remain isolated; never fabricate their heights.
+    lower_faces = faces[:0] if upper_only else faces
+    work.mkdir(parents=True, exist_ok=True)
+    points.astype('<f8').tofile(work/'vertices.f64')
+    lower_faces.tofile(work/'lower-faces.i32')
+    upper_faces.tofile(work/'upper-faces.i32')
+    upper_faces.tofile(work/'upper-faces-all.i32')
+    record = dict(bounds=bounds, vertexCount=len(points), lowerFaceCount=len(lower_faces), upperFaceCount=len(upper_faces),
                   startIndex=(start[0]-r0)*nc+start[1]-c0, goalIndex=(goal[0]-r0)*nc+goal[1]-c0,
                   spacingM=m['transform'][1], oneWayBudgetM=config['roundTripBudgetM']/2,
                   portalElevationStepM=config['portalElevationStepM'])
-    (WORK/'mesh.json').write_text(json.dumps(record, indent=2)+'\n')
+    (work/'mesh.json').write_text(json.dumps(record, indent=2)+'\n')
     # Plain header for the dependency-free C++ upper-witness search.
-    (WORK/'mesh.txt').write_text(' '.join(str(record[k]) for k in ['vertexCount','upperFaceCount','startIndex','goalIndex','spacingM','oneWayBudgetM','portalElevationStepM'])+'\n')
+    (work/'mesh.txt').write_text(' '.join(str(record[k]) for k in ['vertexCount','upperFaceCount','startIndex','goalIndex','spacingM','oneWayBudgetM','portalElevationStepM'])+'\n')
     print(json.dumps(record), flush=True)
     return record
 
 
-def refine_mesh(radius_m=8):
+def refine_mesh(radius_m=8, work=WORK):
     """Focus upper search only; the continuous LOWER domain is never reduced."""
-    m=json.loads((WORK/'mesh.json').read_text());w=json.loads((WORK/'witness.json').read_text())
-    points=np.fromfile(WORK/'vertices.f64','<f8').reshape(-1,3)
-    original=WORK/'upper-faces-all.i32'
-    if not original.exists():original.write_bytes((WORK/'upper-faces.i32').read_bytes())
+    m=json.loads((work/'mesh.json').read_text());w=json.loads((work/'witness.json').read_text())
+    points=np.fromfile(work/'vertices.f64','<f8').reshape(-1,3)
+    original=work/'upper-faces-all.i32'
+    if not original.exists():original.write_bytes((work/'upper-faces.i32').read_bytes())
     faces=np.fromfile(original,'<i4').reshape(-1,3)
     from scipy.spatial import cKDTree
     xy=np.array([[p['row'],p['column']] for p in w['points']])
     distances=cKDTree(xy).query(points[:,:2])[0]*m['spacingM']
     selected=faces[(distances[faces]<=radius_m).any(axis=1)]
-    selected.tofile(WORK/'upper-faces.i32');m['upperFaceCount']=len(selected);m['upperSearchCorridorRadiusM']=radius_m
-    (WORK/'coarse-witness.json').write_text(json.dumps(w)+'\n')
-    (WORK/'mesh.json').write_text(json.dumps(m,indent=2)+'\n')
-    (WORK/'mesh.txt').write_text(' '.join(str(m[k]) for k in ['vertexCount','upperFaceCount','startIndex','goalIndex','spacingM','oneWayBudgetM','portalElevationStepM'])+'\n')
+    selected.tofile(work/'upper-faces.i32');m['upperFaceCount']=len(selected);m['upperSearchCorridorRadiusM']=radius_m
+    (work/'coarse-witness.json').write_text(json.dumps(w)+'\n')
+    (work/'mesh.json').write_text(json.dumps(m,indent=2)+'\n')
+    (work/'mesh.txt').write_text(' '.join(str(m[k]) for k in ['vertexCount','upperFaceCount','startIndex','goalIndex','spacingM','oneWayBudgetM','portalElevationStepM'])+'\n')
     print(json.dumps(m),flush=True)
 
 

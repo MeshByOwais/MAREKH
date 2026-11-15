@@ -12,10 +12,10 @@ from scipy.sparse import coo_matrix, csc_matrix
 from global_grade_bounds import WORK, load_inputs
 
 
-def polish():
-    manifest,_,config,z,blocked=load_inputs();spacing=manifest['transform'][1]
-    w=json.loads((WORK/'witness.json').read_text());original=np.array([[p['row'],p['column']] for p in w['points']])
-    (WORK/'portal-witness.json').write_text(json.dumps(w)+'\n')
+def polish(inputs=None, work=WORK, minimize_grade=True, tolerance=.0001):
+    manifest,_,config,z,blocked=inputs or load_inputs();spacing=manifest['transform'][1]
+    w=json.loads((work/'witness.json').read_text());original=np.array([[p['row'],p['column']] for p in w['points']])
+    (work/'portal-witness.json').write_text(json.dumps(w)+'\n')
     n=len(original);nv=2*n+n-1;faces=[]
     for a,b in zip(original[:-1],original[1:]):
         mid=(a+b)/2;found=None
@@ -83,9 +83,9 @@ def polish():
             length+=math.hypot(h,dz);peak=max(peak,math.degrees(math.atan2(abs(dz),h)))
         if peak>cap+1e-7 or length>config['roundTripBudgetM']/2-1e-6:return None
         return points,length,peak
-    low=0.;high=w['gradeCapDeg'];best=solve(high+.0001)
+    low=0.;high=w['gradeCapDeg'];best=solve(high+.0001 if minimize_grade else high)
     if best is None:raise RuntimeError('Could not retain a feasible corridor witness; original route unchanged')
-    while high-low>.0001:
+    while minimize_grade and high-low>tolerance:
         mid=(low+high)/2;candidate=solve(mid)
         print(json.dumps(dict(capDeg=mid,oneWayM=None if candidate is None else candidate[1])),flush=True)
         if candidate is None:low=mid
@@ -93,8 +93,9 @@ def polish():
     points,length,peak=best;kept=[points[0]]
     for p in points[1:]:
         if np.linalg.norm(p-kept[-1])>1e-8:kept.append(p)
-    w.update(needsGradeRealization=False,gradeCapDeg=math.ceil(max(high,peak+1e-7)*1000)/1000,oneWayDistanceM=length,points=[dict(row=float(p[0]),column=float(p[1])) for p in kept],polishEngine='fixed-face-branch-conic-1',unpolishedGradeCapDeg=w['gradeCapDeg'])
-    (WORK/'witness.json').write_text(json.dumps(w,indent=2)+'\n');print(json.dumps({k:v for k,v in w.items() if k!='points'}),flush=True)
+    declared_cap=math.ceil(max(high,peak+1e-7)*1000)/1000 if minimize_grade else high
+    w.update(needsGradeRealization=False,gradeCapDeg=declared_cap,oneWayDistanceM=length,points=[dict(row=float(p[0]),column=float(p[1])) for p in kept],polishEngine='fixed-face-branch-conic-1',unpolishedGradeCapDeg=w['gradeCapDeg'])
+    (work/'witness.json').write_text(json.dumps(w,indent=2)+'\n');print(json.dumps({k:v for k,v in w.items() if k!='points'}),flush=True)
 
 
 if __name__=='__main__':polish()

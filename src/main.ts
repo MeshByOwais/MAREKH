@@ -1,3 +1,4 @@
+import { averageAbsoluteGrade } from './routing/continuous.ts'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { cellCenter, readFloatGrid, worldToPixel, type RealTerrainManifest } from './terrain/package.ts'
@@ -145,7 +146,7 @@ try {
     routeGroup.visible = (event.target as HTMLInputElement).checked; cursorMarker.visible=routeGroup.visible;draw()
   })
 
-  function renderRoutes(routes:DisplayRoute[],endpoints:Record<string,Endpoint>,mode:'global'|'crew'|'baseline') {
+  function renderRoutes(routes:DisplayRoute[],endpoints:Record<string,Endpoint>,mode:'global'|'crew'|'baseline'|'continuous') {
     const global=mode==='global',crew=mode!=='baseline'
     for(const child of routeGroup.children){const object=child as THREE.Mesh;object.geometry?.dispose();if(object.material){const materials=Array.isArray(object.material)?object.material:[object.material];materials.forEach(m=>m.dispose())}}
     routeGroup.clear();node('route-results').replaceChildren()
@@ -155,7 +156,7 @@ try {
       const color = distancePolicy ? '#ffe26c' : '#29e6b6'
       const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), new THREE.LineBasicMaterial({ color,transparent:true}));line.userData.routeIndex=routeIndex;routeGroup.add(line)
       const row = document.createElement('tr'), m = route.metrics
-      for (const value of [global?'Best grade candidate':crew?(distancePolicy?'Distance priority':'Terrain priority'):(distancePolicy?'Shortest':'Gentler terrain'), `${m.distanceM.toFixed(2)} m`, `${m.positiveClimbM.toFixed(2)} m`, `${m.maxSurfaceSlopeDeg.toFixed(2)}°`, `${m.maxAbsGradeDeg.toFixed(2)}°`, String(m.warningEdgeCount)]) {
+      for (const value of [mode==='continuous'?(route.policy==='minimax-grade'?'Gentler · distance limit':'Shorter · peak limit'):global?'Best grade candidate':crew?(distancePolicy?'Distance priority':'Terrain priority'):(distancePolicy?'Shortest':'Gentler terrain'), `${m.distanceM.toFixed(2)} m`, `${m.positiveClimbM.toFixed(2)} m`, `${m.maxSurfaceSlopeDeg.toFixed(2)}°`, `${m.maxAbsGradeDeg.toFixed(2)}°`, `${averageAbsoluteGrade([route.outbound,route.returnLeg]).toFixed(2)}°`, String(m.warningEdgeCount)]) {
         const cell = document.createElement(row.children.length ? 'td' : 'th')
         if (cell.tagName === 'TH') { cell.setAttribute('scope', 'row'); cell.className = distancePolicy?'shortest':'gentle' }
         if(cell.tagName==='TH'){const button=document.createElement('button');button.type='button';button.className='route-policy-button';button.dataset.routeChoice=String(routeIndex);button.textContent=value;cell.append(button)}else cell.textContent=value;row.append(cell)
@@ -196,11 +197,23 @@ try {
       const endpoints:Record<string,Endpoint>={}
       for(const [name,p]of Object.entries({staging:plan.staging,approach:plan.approach})){const [w,s,e,n]=p.boundsWSEN;endpoints[name]={...p,geometry:{coordinates:[[[w,s],[e,s],[e,n],[w,n],[w,s]]]}}}
       renderRoutes(plan.routes,endpoints,plan.mode)
-      node('optimality-bounds').hidden=true;node('route-downloads').hidden=true;node('saved-review').hidden=true;node('result-kind').textContent='Live planning result'
+      node('live-bounds').hidden=true;node('optimality-bounds').hidden=true;node('route-downloads').hidden=true;node('saved-review').hidden=true;node('result-kind').textContent='Live planning result'
       node('route-status').textContent=`Live plan · ${plan.checkedPieces} ${plan.mode==='crew'?'native pieces':'edges'} rechecked by the engine on both legs. No separate source audit or continuous optimality certificate has been generated for this start.`
       node('endpoint-summary').textContent=`Staging ${plan.staging.cell.row}, ${plan.staging.cell.column}: ${plan.staging.cellCount} touched native cells in a 10 m square; maximum slope ${plan.staging.maxSlopeDeg.toFixed(2)}°. Science approach is unchanged.`
       node('model-summary').textContent=plan.mode==='crew'?'Live NASA-informed crew adaptation: Field D* guidance, local crew steps, native roughness and 1 m clearance. Both policies use the selected staging point. Search is heuristic.':'Live A* baseline: eight-neighbour point-path routes. Departure footprint is checked; crew clearance is not swept along this baseline.'
       node('warning-summary').textContent='Live planning compares distance and terrain cost. It does not minimize peak grade or impose the saved candidate’s 500 m budget. Inspect red profile pieces for surface-slope warnings.'
+      if(plan.mode==='continuous'){
+        const m=plan.routes[0].metrics,avg=averageAbsoluteGrade([plan.routes[0].outbound,plan.routes[0].returnLeg])
+        node('route-status').textContent=`Updated · ${m.distanceM.toFixed(2)} m round trip · ${m.maxAbsGradeDeg.toFixed(2)}° peak grade · ${avg.toFixed(2)}° average absolute grade. ${plan.checkedPieces} native pieces checked independently on both legs.`
+        node('model-summary').textContent=plan.searchScope??'Native triangle portal search with continuous corridor improvement.'
+        node('warning-summary').textContent=`Total round-trip distance ≤${plan.options!.roundTripBudgetM} m. ${plan.options!.objective==='gentlest'?'The search seeks the lowest peak walking-grade candidate within that budget.':`Every native piece has walking grade ≤${plan.options!.gradeLimitDeg}°.`} Surface slope and crew clearance remain separate checks. Tight turns are permitted.`
+        const b=plan.continuousOptimalityBounds
+        node('live-bounds').hidden=!b
+        if(b)node('live-bounds').textContent=`Continuous bounds: minimum possible peak grade within this distance budget is between ${(Math.floor(b.gradeLowerDeg*1000)/1000).toFixed(3)}° and ${(Math.ceil(b.gradeUpperDeg*1000)/1000).toFixed(3)}°. Distance at the peak grade cap: ${(Math.floor(b.distanceLowerM*100)/100).toFixed(2)}–${(Math.ceil(b.distanceUpperM*100)/100).toFixed(2)} m. These endpoint-based bounds can be wide; the exact optimum remains unknown. The saved route’s tighter certificates do not apply to this search.`
+        node('distance-legend').parentElement!.hidden=plan.routes[0].policy==='minimax-grade'
+        node('terrain-legend').parentElement!.hidden=plan.routes[0].policy!=='minimax-grade'
+        node('distance-legend').textContent='Shorter · grade limit';node('terrain-legend').textContent='Gentler · distance limit'
+      }
       container.setAttribute('aria-label','Interactive HiRISE terrain showing live route options, staging footprint and the linked profile marker.')
       draw()
     }
@@ -222,11 +235,24 @@ try {
     const bounds=global?decode(await bytes('bounds.json',packageManifest,base)):undefined
     if(global&&(!bounds||bounds.exactOptimumClaimed!==false||bounds.gradeLowerDeg>=bounds.gradeUpperDeg||bounds.roundTripBudgetM!==500||JSON.stringify(bounds)!==JSON.stringify(audit.bounds)))throw new Error('Optimality bounds do not match the independent audit')
     const clearanceMap=crew?await texture('../crew-navigation-v1/crew-clearance.webp'):undefined
-    const stagingHazard=mode==='crew'?await bytes('hazard.u8',packageManifest,base):undefined
+    let stagingHazard:Uint8Array|undefined
+    if(crew){
+      const crewBase=new URL('../crew-navigation-v1/',root)
+      let hazardManifest=packageManifest
+      if(global){
+        const response=await fetch(new URL('manifest.json',crewBase))
+        if(!response.ok)throw new Error('Crew hazard assessment is unavailable')
+        const buffer=await response.arrayBuffer()
+        if(await sha256(buffer)!==packageManifest.crewManifestSha256)throw new Error('Crew hazard assessment does not match the saved grade model')
+        hazardManifest=JSON.parse(new TextDecoder().decode(buffer))
+      }
+      stagingHazard=await bytes('hazard.u8',hazardManifest,crewBase)
+    }
     if(generation!==loadGeneration)return
     renderRoutes(routes,endpoints,mode)
     const totalEdges = audit.routes.reduce((sum: number, r: { checkedEdges: number }) => sum + r.checkedEdges, 0)
     node('route-status').textContent = `Verified · ${totalEdges} ${crew?'native pieces':'edges'} checked independently · outbound and return · ${packageManifest.routeVersion}`
+    node('live-bounds').hidden=true
     node('optimality-bounds').hidden=!global
     if(bounds){
       node('grade-bound').textContent=`${bounds.gradeLowerDeg.toFixed(3)}°–${bounds.gradeUpperDeg.toFixed(3)}°`
@@ -242,6 +268,7 @@ try {
     node('verification-summary').textContent=global?'The feasible route is checked piece by piece against the native terrain and swept crew clearance. A separate lower-bound check covers every allowed direction on every terrain triangle in the budget area, including paths the route search did not sample. Downloads include the saved route, bound certificates and independent audit.':!crew?'Each A* edge is checked against native coverage, exclusions, surface slope and travel grade. The independent audit checks source heights, endpoint footprints and both legs. This point-path baseline does not sweep crew clearance along the route.':'Field D* supplies global terrain-cost guidance. Local crew steps must pass clearance, slope, roughness and along-move grade checks before selection. Native triangle crossings remain in the saved path. An independent checker verifies every piece and sweeps the crew footprint against hazard cells. The original A* milestone remains available in the model selector.'
     node('distance-legend').textContent=crew?'Distance priority':'Shortest'
     node('distance-legend').parentElement!.hidden=global
+    node('terrain-legend').parentElement!.hidden=false
     node('terrain-legend').textContent=global?'Grade candidate':crew?'Terrain priority':'Gentler terrain'
     container.setAttribute('aria-label',global?'Interactive three-dimensional HiRISE terrain around Home Plate, showing the lowest-peak-grade candidate with continuous optimality bounds, checked endpoints and crew clearance cells.':crew?'Interactive three-dimensional HiRISE terrain around Home Plate, showing distance-priority and terrain-priority crew routes, checked endpoints and crew clearance cells.':'Interactive three-dimensional HiRISE terrain around Home Plate, showing shortest and gentler Phase 3 A* baseline routes and checked endpoints.')
     crewLayerActive=crew;crewClearance.material.map=clearanceMap??null;crewClearance.material.needsUpdate=true;crewClearance.visible=crew&&(node('show-crew-clearance') as HTMLInputElement).checked

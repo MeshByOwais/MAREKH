@@ -10,3 +10,5 @@
 .profile-leg-labels{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;margin:18px 0 10px;color:#b4c3cc;font-size:12px}.profile-leg-labels span:last-child{text-align:right}
 
 #placement-status[data-state=invalid],#route-placement-status[data-state=invalid]{color:#ff9da2;background:#351e26;border-left:3px solid #ff7279;padding:14px;border-radius:5px}#placement-status[data-state=pending],#route-placement-status[data-state=pending]{color:#ffcb91}#placement-status[data-state=ready],#route-placement-status[data-state=ready]{color:#8cffa7}#route-placement-status{font-size:14px;line-height:1.65}input[aria-invalid=true]{border-color:#ff7279!important}
+
+.continuous-controls{flex-basis:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;margin:1rem 0}.continuous-controls[hidden]{display:none}.continuous-controls label{display:flex;flex-direction:column;align-items:flex-start;gap:.5rem}.continuous-controls select{max-width:100%;white-space:normal}.continuous-controls p{grid-column:1/-1;margin:0}.live-planning fieldset{min-width:0}#live-bounds{line-height:1.65}

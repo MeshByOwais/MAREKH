@@ -4,7 +4,7 @@ Mars Assisted Routing & Environmental Knowledge for Humans. A crew-walk planner 
 
 **Continuous walking-grade search with stated bounds is implemented.** The default result minimizes peak walking grade within a 500 m round trip, then seeks a short route at the feasible grade cap. The checked route is **494.66 m**, with a **2.60°** peak walking grade. The continuous minimum grade is bounded by **2.150°–2.601°**; the exact optimum remains unknown. At the feasible 2.601° cap, minimum distance is bounded by **476.28–494.67 m**.
 
-[Method, proof, numerical limits and reproduction](docs/global-grade-planning.md). Bounds cover continuous headings on the native piecewise-planar surface and retain the crew model's terrain and full-route clearance limits. The continuous-grade candidate and certificates are saved results for their original endpoints. Phase 4 adds live crew and A* replanning with movable staging, route comparison and a map-linked round-trip profile.
+[Method, proof, numerical limits and reproduction](docs/global-grade-planning.md). Bounds cover continuous headings on the native piecewise-planar surface and retain the crew model's terrain and full-route clearance limits. The original conic certificates remain tied to their original endpoints. The continuous planner now also runs live searches for new staging locations: choose the gentlest candidate within a total distance budget, or a shorter candidate within a peak walking-grade cap. Each live route receives an independent native geometry and clearance audit and conservative analytical bounds. [Live continuous planner](docs/live-continuous-planning.md).
 
 The NASA-informed Field D* crew routes and Phase 3 A* comparison remain selectable and unchanged. [NASA-informed architecture, sources and assumptions](docs/nasa-crew-navigation.md). The project remains a crew-walk planner.
 
@@ -25,12 +25,12 @@ Open the printed local URL. The full `bun run build` command also audits the ori
 cd /home/owais/MAREKH
 export PATH="$HOME/.bun/bin:$PATH"
 export COLUMBIA_GDAL_PYTHON=/usr/bin/python3
-bun run preview --port 4175
+bun run serve:planner
 ```
 
-Open the printed local URL. The app needs its local server and WebGL; opening `index.html` directly from disk does not load its modules or terrain assets.
+The continuous service needs the C++ compiler and numerical Python dependencies described in [the live-planner guide](docs/live-continuous-planning.md); they are installed on this machine. Open the printed local URL. The app needs its local server and WebGL; opening `index.html` directly from disk does not load its modules or terrain assets.
 
-The main page includes the terrain explorer, live crew/A* route comparison, the linked profile, and downloads for saved or live results. `/review.html` contains the Phase 1 source/coverage review, and `/fixture.html` retains the small synthetic 3D fixture. [The standalone Phase 1 review](docs/phase-1-review.html) can also be opened directly from disk.
+The main page includes the terrain explorer, continuous distance/grade controls, live crew/A* comparisons, the linked profile, and downloads for saved or live results. `/review.html` contains the Phase 1 source/coverage review, and `/fixture.html` retains the small synthetic 3D fixture. [The standalone Phase 1 review](docs/phase-1-review.html) can also be opened directly from disk.
 
 ## Reproduce the preparation and build
 
@@ -82,7 +82,8 @@ Bun 1.3.10 is pinned in `.bun-version` and `package.json`. Dependency versions a
 | `bun run typecheck` | Check TypeScript source and tests |
 | `bun run build` | Validate terrain and route packages, check TypeScript, and build the app into `dist/` |
 | `bun run dev` | Start the Vite development server after preparation |
-| `bun run preview --port 4175` | Serve the production build locally |
+| `bun run preview --port 4175` | Serve the static production build; continuous search API is unavailable |
+| `bun run serve:planner` | Serve the production build with the live continuous planner on port 4175 |
 
 ## Data and documentation
 
@@ -108,6 +109,6 @@ Choose **NASA-informed crew planning** or **Phase 3 · A* baseline**, then pick 
 
 Select a policy in the results or **Inspect route**. Scrub the two-leg elevation profile by pointer, touch or the distance slider; keyboard arrows, Home and End are supported. **Science turnaround** jumps to the approach; **Next surface warning** finds a red piece. The map marker, signed walking grade, crossed surface slope and alert reason use the same distance cursor. Live plans can be downloaded as JSON.
 
-The minimum-grade candidate and its continuous bounds remain a saved result for the original endpoints. Live crew and A* searches compare distance and terrain cost; they do not recompute those certificates or enforce the saved candidate’s 500 m budget. The UI keeps saved independent audits separate from live engine checks. Production pages include the search worker in their loaded bundle, so new searches for the already loaded model and terrain continue if the local server stops. Initial loading, reloading and fetching another model still need the server.
+Choose **Continuous route planner** to use the native elevation-portal and conic system for new staging locations. **Gentlest within a distance limit** searches for a low peak grade within the total budget. **Shorter within a peak-grade limit** seeks a short route with every native piece below the selected cap; the distance ceiling is also enforced. Average absolute grade is reported separately. Continuous jobs need `bun run serve:planner`, can take minutes, and receive independent checks before display. Their analytical global bounds can be wider than the original saved certificates. Live crew and A* searches still compare distance and terrain cost without these constraints. The UI distinguishes saved evidence, independently checked continuous results and crew/A* engine checks. Production pages include the search worker in their loaded bundle, so new searches for the already loaded model and terrain continue if the local server stops. Initial loading, reloading and fetching another model still need the server.
 
 Run `bun run test:interactive` for the planning/profile checks. Independently audit a downloaded plan with `bun run validate:live /absolute/path/marekh-live-plan.json` (requires the existing Python/GDAL environment). See [Phase 4 completion and limits](docs/phase-4-completion.md). Rehearsal is Phase 5.

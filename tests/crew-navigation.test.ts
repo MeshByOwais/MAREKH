@@ -1,7 +1,7 @@
 import {test,expect} from 'bun:test'
 import {FieldDStar,interpolatedCost} from '../src/routing/field-dstar.ts'
 import {assessCrewTerrain,fieldCosts,checkCrewSegment,nativeHeight,touchedCells,type CrewModel} from '../src/routing/crew-terrain.ts'
-import {planCrewRoute} from '../src/routing/crew-planner.ts'
+import {planCrewRoute,crewLeg} from '../src/routing/crew-planner.ts'
 import type {Grid,Rules} from '../src/routing/planner.ts'
 
 const rules:Rules={warningSlopeDeg:10,routeSlopeLimitDeg:20,stagingSlopeLimitDeg:5,moveGradeLimitDeg:20,gentleWeight:4}
@@ -101,4 +101,16 @@ test('global Field D* guidance gets local crew steps around an extended obstacle
   expect(route.outbound.points.some(p=>p.row<10||p.row>32)).toBe(true)
   for(let i=1;i<route.outbound.points.length;i++)expect(checkCrewSegment(t,route.outbound.points[i-1],route.outbound.points[i])).toBeDefined()
   expect(route.returnLeg.points.at(-1)!.row).toBe(21)
+})
+
+test('collapsed conic crossings measure grades from the actual emitted points',()=>{
+  const g=grid();for(let r=0;r<25;r++)for(let c=0;c<25;c++)g.elevation[r*25+c]=-1920+.1*r+.05*c
+  const t=assessCrewTerrain(g,rules,model),leg=crewLeg(t,[{row:10.1,column:10.1},{row:10.5000000001,column:10.5000000001},{row:11.1,column:11.05}],'distance')
+  let length=0,peak=0
+  for(let i=1;i<leg.points.length;i++){
+    const a=leg.points[i-1],b=leg.points[i],h=Math.hypot(b.row-a.row,b.column-a.column),dz=b.elevationM-a.elevationM,grade=Math.atan2(dz,h)*180/Math.PI
+    expect(b.segmentGradeDeg).toBeCloseTo(grade,10);length+=Math.hypot(h,dz);peak=Math.max(peak,Math.abs(grade))
+    expect(b.cumulativeDistanceM).toBeCloseTo(length,10)
+  }
+  expect(leg.metrics.maxAbsGradeDeg).toBeCloseTo(peak,10)
 })

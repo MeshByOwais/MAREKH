@@ -30,7 +30,8 @@
     "validate:global": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/validate_global_routes.py",
     "test:global": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" -m unittest discover -s tests -p 'test_global_grade.py' -v",
     "test:interactive": "bun test tests/interactive.test.ts",
-    "validate:live": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/validate_live_plan.py"
+    "validate:live": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/validate_live_plan.py",
+    "serve:planner": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/serve_planner.py --port 4175"
   },
   "dependencies": {
     "three": "0.187.0"

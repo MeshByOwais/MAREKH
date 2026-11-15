@@ -20,15 +20,18 @@ export function crewLeg(terrain:CrewTerrain,path:FieldPoint[],policy:CrewPolicy)
   metrics.maxSurfaceSlopeDeg=points[0].surfaceSlopeDeg
   for(let i=1;i<path.length;i++) {
     const step=checkCrewSegment(terrain,path[i-1],path[i]);if(!step)throw new Error('Final crew segment failed native/clearance validation')
-    let prior=path[i-1]
     for(const part of step.parts) {
       if(part.horizontalM<1e-8)continue
+      // A conic solve can collapse adjacent crossings. Measure from the last
+      // emitted point, including any skipped sub-nanometre native fragments.
+      const prior=points[points.length-1]
       const checked=checkCrewSegment(terrain,prior,part.point);if(!checked)throw new Error('Native piece failed validation')
-      metrics.distanceM+=part.distanceM;metrics.horizontalDistanceM+=part.horizontalM;metrics.positiveClimbM+=Math.max(0,part.elevationM-points[points.length-1].elevationM)
-      metrics.maxSurfaceSlopeDeg=Math.max(metrics.maxSurfaceSlopeDeg,checked.maxSurfaceSlopeDeg);metrics.maxAbsGradeDeg=Math.max(metrics.maxAbsGradeDeg,Math.abs(part.gradeDeg))
-      metrics.cost+=policy==='distance'?part.horizontalM:checked.terrainCost
+      const h=terrain.spacingM*Math.hypot(part.point.row-prior.row,part.point.column-prior.column),dz=part.elevationM-prior.elevationM,grade=Math.atan2(dz,h)*180/Math.PI
+      metrics.distanceM+=Math.hypot(h,dz);metrics.horizontalDistanceM+=h;metrics.positiveClimbM+=Math.max(0,dz)
+      metrics.maxSurfaceSlopeDeg=Math.max(metrics.maxSurfaceSlopeDeg,checked.maxSurfaceSlopeDeg);metrics.maxAbsGradeDeg=Math.max(metrics.maxAbsGradeDeg,Math.abs(grade))
+      metrics.cost+=policy==='distance'?h:checked.terrainCost
       if(checked.maxSurfaceSlopeDeg>terrain.rules.warningSlopeDeg)metrics.warningEdgeCount++
-      point(part.point,part.gradeDeg,checked.maxSurfaceSlopeDeg);prior=part.point
+      point(part.point,grade,checked.maxSurfaceSlopeDeg)
     }
   }
   return {points,metrics}

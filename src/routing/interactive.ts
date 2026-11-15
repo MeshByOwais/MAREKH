@@ -2,6 +2,7 @@ import { cellCenter } from '../terrain/package.ts'
 import { planRoute, edge, type Cell, type Grid, type Rules, type Route } from './planner.ts'
 import { assessCrewTerrain, checkCrewSegment, type CrewModel } from './crew-terrain.ts'
 import { planCrewRoute, type CrewRoute } from './crew-planner.ts'
+import type { ContinuousOptions, ContinuousBounds } from './continuous.ts'
 
 export type LiveMode = 'crew' | 'baseline'
 export type PlanningConfig = {
@@ -12,7 +13,8 @@ export type PlanningConfig = {
 }
 export type Footprint = { cell: Cell; eastM: number; northM: number; elevationM:number; cells: number[]; cellCount: number; maxSlopeDeg: number; slopeLimitDeg:number; boundsWSEN: number[]; geometry:{type:'Polygon';coordinates:number[][][]} }
 export type LiveRequest = { id: number; grid: Grid; config: PlanningConfig; mode: LiveMode; start: Cell }
-export type LivePlan = { routes: (Route | CrewRoute)[]; staging: Footprint; approach: Footprint; checkedPieces: number; mode: LiveMode }
+type ContinuousRoute = Pick<CrewRoute,'status'|'datasetVersion'|'start'|'target'|'outbound'|'returnLeg'|'metrics'|'scienceWaypointIndex'|'turnaroundDistanceM'> & { policy:'minimax-grade'|'shortest-peak'; engine:string }
+export type LivePlan = { routes: (Route | CrewRoute | ContinuousRoute)[]; staging: Footprint; approach: Footprint; checkedPieces: number; mode: LiveMode | 'continuous'; options?: ContinuousOptions; continuousOptimalityBounds?: ContinuousBounds; searchScope?: string; independentAudit?: boolean; config?: PlanningConfig }
 export type LiveMessage = { id: number } & ({ type: 'progress'; text: string } | { type: 'result'; plan: LivePlan } | { type: 'error'; text: string })
 
 /** Each new intent invalidates every earlier load/search, including failures. */

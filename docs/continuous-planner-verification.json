@@ -1,0 +1,156 @@
+{
+  "date": "2026-11-15",
+  "status": "passed",
+  "checks": {
+    "bunTests": 46,
+    "pythonTests": 34,
+    "typecheck": "passed",
+    "fullBuildIncludingSavedSourceAudits": "passed",
+    "browserNewStaging": "passed: 396,498 replaces 370,406 only after a checked result",
+    "browserCancel": "passed: displayed route retained",
+    "browserImpossibleBudget": "passed: clear distance rejection; displayed route retained; valid staging stays marked valid",
+    "downloadedPlanIndependentReaudit": "passed: 930 native pieces",
+    "apiInvalidLimits": "HTTP 400",
+    "apiCrossOriginMutation": "HTTP 403",
+    "browserConsole": "No warnings or errors in the finished planner",
+    "missingHeightDomain": "passed: unknown vertices remain isolated; all witness faces have native finite heights"
+  },
+  "liveResults": [
+    {
+      "request": {
+        "objective": "gentlest",
+        "roundTripBudgetM": 500,
+        "gradeLimitDeg": 3,
+        "start": {
+          "row": 370,
+          "column": 406
+        }
+      },
+      "metrics": {
+        "distanceM": 496.3049310642896,
+        "horizontalDistanceM": 495.91532383110047,
+        "positiveClimbM": 9.242400549667764,
+        "maxSurfaceSlopeDeg": 12.205559730529785,
+        "maxAbsGradeDeg": 2.591727601536457,
+        "warningEdgeCount": 212,
+        "cost": 495.91532383110047,
+        "estimatedTimeS": null,
+        "averageAbsGradeDeg": 2.13462648753079
+      },
+      "independentAudit": true,
+      "audit": {
+        "status": "passed",
+        "mode": "continuous",
+        "staging": {
+          "row": 370,
+          "column": 406
+        },
+        "checkedPieces": 1752,
+        "checker": "Independent Python geometry, native arrays, footprint and full swept crew clearance where applicable",
+        "scope": "Live native geometry and constraints; analytical bounds only for continuous jobs, no newly generated conic lower potential"
+      },
+      "bounds": {
+        "gradeLowerDeg": 1.740906828636141,
+        "gradeUpperDeg": 2.591727601536457,
+        "distanceLowerM": 402.44154701484103,
+        "distanceUpperM": 496.3049310642896,
+        "exactOptimumClaimed": false,
+        "method": "Endpoint elevation and 3D chord relaxations; conservative numerical margins.",
+        "scope": "Global lower bounds on the continuous native surface; candidate upper bounds. Grade bracket concerns minimum peak grade within this distance budget. Distance bracket uses the selected peak or average cap; for gentlest, it uses the candidate peak cap. No tight gap or exact optimum is claimed."
+      },
+      "engine": "native-portals-conic-live-1",
+      "polishEngine": "fixed-face-branch-conic-1"
+    },
+    {
+      "request": {
+        "objective": "shortest-peak",
+        "roundTripBudgetM": 500,
+        "gradeLimitDeg": 6,
+        "start": {
+          "row": 370,
+          "column": 406
+        }
+      },
+      "metrics": {
+        "distanceM": 408.54149497836386,
+        "horizontalDistanceM": 407.67299192484063,
+        "positiveClimbM": 11.277595215294696,
+        "maxSurfaceSlopeDeg": 13.527230262756348,
+        "maxAbsGradeDeg": 5.99999002520712,
+        "warningEdgeCount": 92,
+        "cost": 407.67299192484063,
+        "estimatedTimeS": null,
+        "averageAbsGradeDeg": 3.166787728816727
+      },
+      "independentAudit": true,
+      "audit": {
+        "status": "passed",
+        "mode": "continuous",
+        "staging": {
+          "row": 370,
+          "column": 406
+        },
+        "checkedPieces": 1584,
+        "checker": "Independent Python geometry, native arrays, footprint and full swept crew clearance where applicable",
+        "scope": "Live native geometry and constraints; analytical bounds only for continuous jobs, no newly generated conic lower potential"
+      },
+      "bounds": {
+        "gradeLowerDeg": 1.740906828636141,
+        "gradeUpperDeg": 5.99999002520712,
+        "distanceLowerM": 402.44154701484103,
+        "distanceUpperM": 408.54149497836386,
+        "exactOptimumClaimed": false,
+        "method": "Endpoint elevation and 3D chord relaxations; conservative numerical margins.",
+        "scope": "Global lower bounds on the continuous native surface; candidate upper bounds. Grade bracket concerns minimum peak grade within this distance budget. Distance bracket uses the selected peak cap; for gentlest, it uses the candidate peak cap. No tight gap or exact optimum is claimed."
+      },
+      "engine": "native-portals-conic-live-1",
+      "polishEngine": "fixed-face-branch-conic-1"
+    },
+    {
+      "request": {
+        "objective": "shortest-peak",
+        "roundTripBudgetM": 350,
+        "gradeLimitDeg": 6,
+        "start": {
+          "row": 396,
+          "column": 498
+        }
+      },
+      "metrics": {
+        "distanceM": 246.36259270894072,
+        "horizontalDistanceM": 245.8761776080466,
+        "positiveClimbM": 6.70047524857182,
+        "maxSurfaceSlopeDeg": 11.996014595031738,
+        "maxAbsGradeDeg": 5.999990011723681,
+        "warningEdgeCount": 34,
+        "cost": 245.8761776080466,
+        "estimatedTimeS": null,
+        "averageAbsGradeDeg": 3.1197447041792175
+      },
+      "independentAudit": true,
+      "audit": {
+        "status": "passed",
+        "mode": "continuous",
+        "staging": {
+          "row": 396,
+          "column": 498
+        },
+        "checkedPieces": 930,
+        "checker": "Independent Python geometry, native arrays, footprint and full swept crew clearance where applicable",
+        "scope": "Live native geometry and constraints; analytical bounds only for continuous jobs, no newly generated conic lower potential"
+      },
+      "bounds": {
+        "gradeLowerDeg": 1.9826072867363984,
+        "gradeUpperDeg": 5.999990011723681,
+        "distanceLowerM": 244.38299621928613,
+        "distanceUpperM": 246.36259270894072,
+        "exactOptimumClaimed": false,
+        "method": "Endpoint elevation and 3D chord relaxations; conservative numerical margins.",
+        "scope": "Global lower bounds on the continuous native surface; candidate upper bounds. Grade bracket concerns minimum peak grade within this distance budget. Distance bracket uses the selected peak cap; for gentlest, it uses the candidate peak cap. No tight gap or exact optimum is claimed."
+      },
+      "engine": "native-portals-conic-live-1",
+      "polishEngine": "fixed-face-branch-conic-1"
+    }
+  ],
+  "limits": "These are feasible candidates with analytical numerical global lower bounds. They do not establish an exact continuous global optimum. Original conic certificates apply only to their saved request."
+}

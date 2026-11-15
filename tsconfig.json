@@ -21,6 +21,7 @@
     "tests",
     "tools/generate_routes.ts",
     "tools/generate_crew_routes.ts",
-    "tools/generate_global_routes.ts"
+    "tools/generate_global_routes.ts",
+    "tools/package_continuous_plan.ts"
   ]
 }
