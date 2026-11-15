@@ -1,0 +1,4 @@
+# Offline route generation only. The independent build-time audit needs no solver.
+numpy==1.26.4
+scipy==1.14.1
+clarabel==0.9.0

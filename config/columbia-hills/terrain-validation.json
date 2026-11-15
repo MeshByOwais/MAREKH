@@ -1,0 +1,56 @@
+{
+  "datasetVersion": "columbia-hills-terrain-1",
+  "status": "passed",
+  "nativeGrid": [
+    990,
+    990
+  ],
+  "validCells": 976144,
+  "unknownCells": 3956,
+  "reviewedExclusionCells": 74529,
+  "slopeIndependentMaxErrorDeg": 1.85180054046441e-06,
+  "sourceElevationMaxErrorM": 0,
+  "opticalTextureMaxDnError": 0,
+  "renderStride": 2,
+  "renderTriangleMaxVerticalDeviationM": 0.95867919921875,
+  "renderTriangleRmsVerticalDeviationM": 0.0193853519222326,
+  "spotChecks": [
+    {
+      "row": 100,
+      "column": 100,
+      "elevationM": -1928.053466796875,
+      "slopeDeg": 8.102692604064941,
+      "sourceElevationDifferenceM": 0.0
+    },
+    {
+      "row": 375,
+      "column": 420,
+      "elevationM": -1926.12451171875,
+      "slopeDeg": 2.6310338973999023,
+      "sourceElevationDifferenceM": 0.0
+    },
+    {
+      "row": 480,
+      "column": 500,
+      "elevationM": -1921.873779296875,
+      "slopeDeg": 2.268867254257202,
+      "sourceElevationDifferenceM": 0.0
+    },
+    {
+      "row": 503,
+      "column": 554,
+      "elevationM": -1918.4696044921875,
+      "slopeDeg": 8.045312881469727,
+      "sourceElevationDifferenceM": 0.0
+    },
+    {
+      "row": 800,
+      "column": 800,
+      "elevationM": -1862.1142578125,
+      "slopeDeg": 13.663182258605957,
+      "sourceElevationDifferenceM": 0.0
+    }
+  ],
+  "absoluteGeolocationAccuracyM": null,
+  "scope": "Source-grid equality, texture orientation/values, independent native slopes and display interpolation. Does not approve endpoint safety or certify absolute positioning."
+}

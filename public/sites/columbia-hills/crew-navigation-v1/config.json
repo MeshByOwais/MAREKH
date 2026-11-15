@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "routeVersion": "columbia-hills-crew-navigation-1",
+  "datasetVersion": "columbia-hills-terrain-1",
+  "missionType": "crew-walk",
+  "engine": "field-dstar-crew-local-1",
+  "rules": { "warningSlopeDeg": 10, "routeSlopeLimitDeg": 20, "stagingSlopeLimitDeg": 5, "moveGradeLimitDeg": 20, "gentleWeight": 4 },
+  "crewModel": { "bodyRadiusM": 0.45, "clearanceMarginM": 0.55, "roughnessRmsLimitM": 0.1, "residualLimitM": 0.25, "roughnessWeight": 2 },
+  "localPlanner": { "stepM": 1, "directions": 32, "turnWeight": 0.05, "maxSteps": 5000 },
+  "staging": { "cell": { "row": 370, "column": 406 }, "footprintWidthM": 10, "footprintHeightM": 10 },
+  "approach": { "cell": { "row": 503, "column": 554 }, "footprintWidthM": 2, "footprintHeightM": 2, "proposedEastNorthM": [1602.097981416713, -865443.9211631651] },
+  "assumptions": {
+    "scope": "NASA-publication-based algorithm architecture adapted to a crew walk, independently implemented; not NASA flight software, validated astronaut mobility limits, GESTALT or ACE.",
+    "clearance": "0.45 m illustrative body radius plus 0.55 m planning margin = 1 m. Dilate every hard hazard from its full cell box to full candidate cell boxes, so the complete path has conservative clearance. Includes unknown coverage and map boundary.",
+    "roughness": "Least-squares plane fitted to each native 3x3 height window. RMS residual <= 0.10 m and maximum absolute residual <= 0.25 m are demo limits, not NASA values. Orbital residuals are not a measured rock size, vertical step or soil bearing strength.",
+    "globalPlanner": "Uniform-grid Field D*: g/rhs consistency, priority queue, linear cost interpolation across cardinal-diagonal neighbour pairs, incremental cost repair. Uses the documented centre-cell-only variant, no bottom-cell shortcut, no flight lookup table; h=0 produces a reusable full goal field. Nodes are native cell centres; cost squares lie between four centres.",
+    "costs": "Distance priority uses density 1; terrain priority uses maximum of four densities 1 + 4*(native slope/20 deg)^2 + 2*(plane RMS/0.10 m)^2. A cost square is blocked if any corner cell fails full-cell clearance or either native triangle gradient exceeds 20 deg. Global objective is a 2D cost field, not exact minimum 3D walking distance.",
+    "localPlanner": "Crew can step in any heading: candidates use 32 headings plus direct target and Field D* successor guidance, over 1 m and 0.5 m steps. Hard native-height and footprint checks precede ranking by integrated local cost + global cost-to-go + 0.05 m-equivalent per radian turn. Goal cost must decrease. Fail explicitly on a stall; no silent fallback. Local search is heuristic, not a global optimality guarantee.",
+    "nativeValidation": "Piecewise-planar interpolation on the complete native grid; split at cell boundaries, interpolation patch lines and diagonals. Check exact touched native cells, unknown/exclusion/roughness inflation, source support and signed grade on every resulting linear piece.",
+    "unknown": "Unknown and outside-map terrain remain blocked. Deliberate conservative difference from MER's exploratory finite-cost unknown-cell policy.",
+    "return": "Static symmetric crew constraints permit reversed geometry. Revalidate native pieces, signed grades, cost and positive climb separately for return. No heading-dependent rover suspension model.",
+    "sensing": "All terrain currently comes from a static orbital product. No simulated sensor data is represented as measured stereo, odometry, rock detection or live observations.",
+    "time": "No verified walking speed, metabolic or operational timing model; estimated time stays null."
+  },
+  "sources": [
+    { "title": "Global Path Planning on Board the Mars Exploration Rovers", "url": "https://www-robotics.jpl.nasa.gov/media/documents/IEEEAC-Carsten-1125.pdf", "use": "Global-local separation, traversability costs, configuration-space obstacle expansion, local candidate evaluation" },
+    { "title": "Using Interpolation to Improve Path Planning: The Field D* Algorithm", "url": "https://publications.ri.cmu.edu/storage/publications/pub_files/pub4/ferguson_david_2006_3/ferguson_david_2006_3.pdf", "use": "Uniform-grid interpolation backup and incremental consistency repair; centre-cell-only MER variant" },
+    { "title": "JPL Mars 2020 Mobility", "url": "https://robotics.jpl.nasa.gov/what-we-do/flight-projects/mars-2020-rover/m2020mobility/", "use": "Documents the boundary between heading-independent clearance and rover orientation-sensitive hazard assessment" }
+  ]
+}

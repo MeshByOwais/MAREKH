@@ -1,0 +1,116 @@
+{
+  "siteId": "columbia-hills",
+  "area": "Home Plate, Columbia Hills, Gusev Crater",
+  "catalogue": "https://www.uahirise.org/dtm/PSP_001513_1655",
+  "products": [
+    {
+      "kind": "elevation",
+      "productId": "DTEEC_001513_1655_001777_1650_U01",
+      "filename": "DTEEC_001513_1655_001777_1650_U01.IMG",
+      "url": "https://www.uahirise.org/PDS/DTM/PSP/ORB_001500_001599/PSP_001513_1655_PSP_001777_1650/DTEEC_001513_1655_001777_1650_U01.IMG",
+      "catalogueBytes": 283089408,
+      "sha256": "5e8a15e1422d076963b6ade27af9b6cc49033c4de3a30cd1e8ad53a044d89b5f",
+      "verifiedBytes": 283089408,
+      "retrievedAt": "2026-11-14T15:45:58.937279+00:00"
+    },
+    {
+      "kind": "optical",
+      "productId": "PSP_001513_1655_RED_C_01_ORTHO",
+      "filename": "PSP_001513_1655_RED_C_01_ORTHO.JP2",
+      "url": "https://www.uahirise.org/PDS/DTM/PSP/ORB_001500_001599/PSP_001513_1655_PSP_001777_1650/PSP_001513_1655_RED_C_01_ORTHO.JP2",
+      "catalogueBytes": 24931905,
+      "sha256": "fecc6be78b91fd41f42264e3d0f1376c6b2a378c5c12193fc98a2afe8971ac33",
+      "verifiedBytes": 24931905,
+      "retrievedAt": "2026-11-14T15:46:09.587466+00:00"
+    },
+    {
+      "kind": "optical-label",
+      "productId": "PSP_001513_1655_RED_C_01_ORTHO",
+      "filename": "PSP_001513_1655_RED_C_01_ORTHO.LBL",
+      "url": "https://www.uahirise.org/PDS/DTM/PSP/ORB_001500_001599/PSP_001513_1655_PSP_001777_1650/PSP_001513_1655_RED_C_01_ORTHO.LBL",
+      "catalogueBytes": 5325,
+      "sha256": "3a9ced7e8d9e326db7a306d164c3652ff79c23076d253d86169a553d87829248",
+      "verifiedBytes": 5325,
+      "retrievedAt": "2026-11-14T15:46:10.430347+00:00"
+    }
+  ],
+  "references": [
+    {
+      "name": "Gertrude Weise observation",
+      "productId": "PIA11758",
+      "url": "https://science.nasa.gov/photojournal/rovers-wheel-churns-up-bright-martian-soil/",
+      "filename": "references/PIA11758.jpg",
+      "assetUrl": "https://assets.science.nasa.gov/dynamicimage/assets/science/psd/photojournal/pia/pia11/pia11758/PIA11758.jpg",
+      "credits": "NASA/JPL-Caltech/Cornell",
+      "observationDate": "2007-05-21",
+      "sol": 1202,
+      "sha256": "c938462f2f05db163a3494408691aa5cc1defe75e1d85a5822eeb29b89730de8",
+      "verifiedBytes": 127644,
+      "retrievedAt": "2026-11-14T15:53:20.379359+00:00"
+    },
+    {
+      "name": "Spirit tracks around Home Plate",
+      "url": "https://science.nasa.gov/photojournal/spirits-tracks-around-home-plate/",
+      "productId": "PIA09089",
+      "filename": "references/PIA09089.jpg",
+      "assetUrl": "https://assets.science.nasa.gov/dynamicimage/assets/science/psd/photojournal/pia/pia09/pia09089/PIA09089.jpg",
+      "credits": "NASA/JPL-Caltech/University of Arizona",
+      "observationDate": "2006-11-22",
+      "sha256": "48e0c9cfe65fc1e8108f35cde057657c6918c6c355907ad8daaa7e59e7fe1bfa",
+      "verifiedBytes": 134816,
+      "retrievedAt": "2026-11-14T15:53:20.382840+00:00"
+    },
+    {
+      "name": "Ruff et al. (2008), The nature and distribution of silica at Home Plate, Figure 1",
+      "productId": "LPSC-2008-2213",
+      "url": "https://www.lpi.usra.edu/meetings/lpsc2008/pdf/2213.pdf",
+      "assetUrl": "https://www.lpi.usra.edu/meetings/lpsc2008/pdf/2213.pdf",
+      "filename": "references/Ruff-2008-2213.pdf",
+      "use": "Local scientific reference and map registration; figure is not bundled into the app.",
+      "sha256": "09514ccd14ee32411b570ef336eb2d272a607682be7acfe95ce729f8d684ef9f",
+      "verifiedBytes": 905635,
+      "retrievedAt": "2026-11-14T15:53:20.390557+00:00"
+    }
+  ],
+  "cropBounds": {
+    "order": "west,south,east,north",
+    "values": [
+      1041.8680185406238,
+      -865935.8202632276,
+      2042.3038462371487,
+      -864935.384435531
+    ],
+    "crsWkt": "PROJCS[\"EQUIRECTANGULAR MARS\",GEOGCS[\"GCS_MARS\",DATUM[\"D_MARS\",SPHEROID[\"MARS_localRadius\",3395580,0]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Equirectangular\"],PARAMETER[\"standard_parallel_1\",-10],PARAMETER[\"central_meridian\",175.5],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+    "sourcePixelWindow": [
+      4390,
+      5985,
+      990,
+      990
+    ]
+  },
+  "stagingPoint": null,
+  "scienceApproach": {
+    "coordinates": [
+      1602.097981416713,
+      -865443.9211631651
+    ],
+    "units": "m",
+    "status": "proposed-unverified",
+    "reference": "mission-review.json"
+  },
+  "credits": "NASA/JPL-Caltech/University of Arizona; DTM produced by USGS",
+  "observations": [
+    {
+      "productId": "PSP_001513_1655",
+      "acquisitionDate": "2006-11-22",
+      "localMarsTime": "15:29",
+      "url": "https://www.uahirise.org/PSP_001513_1655"
+    },
+    {
+      "productId": "PSP_001777_1650",
+      "acquisitionDate": "2006-12-12",
+      "localMarsTime": "15:39",
+      "url": "https://www.uahirise.org/PSP_001777_1650"
+    }
+  ]
+}

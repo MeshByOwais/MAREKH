@@ -1,0 +1,16 @@
+{
+  "status": "bounded",
+  "gradeLowerDeg": 2.15,
+  "gradeUpperDeg": 2.601,
+  "gradeGapDeg": 0.45100000000000007,
+  "gradeLowerCertificate": "potential-2.150000.f64",
+  "secondaryDistanceLowerM": 476.28631046522634,
+  "secondaryDistanceUpperM": 494.661999907313,
+  "secondaryDistanceGapM": 18.37568944208664,
+  "secondaryGradeCapDeg": 2.601,
+  "secondaryCertificate": "potential-2.601000.f64",
+  "roundTripBudgetM": 500,
+  "exactOptimumClaimed": false,
+  "numerics": "Double precision; conservative potential scaling and a 0.00001 m one-way subtraction. Not an interval-arithmetic proof.",
+  "scope": "Continuous piecewise-planar native terrain; static symmetric crew model; distance bounds at the reported feasible grade cap, not exact lexicographic optimum."
+}

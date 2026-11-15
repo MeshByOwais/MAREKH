@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MAREKH · Home Plate Coverage Review</title>
+    <link rel="stylesheet" href="/src/review.css">
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="./index.html">MAREKH <span>/ Mars Traverse Planner</span></a>
+      <span class="badge">Phase 1 · Source and coverage review</span>
+    </header>
+    <main>
+      <p class="eyebrow">Columbia Hills / Gusev Crater</p>
+      <h1>Home Plate, in context.</h1>
+      <p class="intro">Real orbital imagery and elevation, aligned through the HiRISE product label. Review the shared coverage and the evidence behind the proposed science area before terrain modelling and routing begin.</p>
+      <dl class="metrics" aria-label="Dataset measurements">
+        <div><dt>Mission crop</dt><dd id="crop-size">Loading…</dd></div>
+        <div><dt>Shared coverage in crop</dt><dd id="valid-coverage">Loading…</dd></div>
+        <div><dt>Native grid</dt><dd id="grid-scale">Loading…</dd></div>
+        <div><dt>Relative map fit / RMS</dt><dd id="registration-rms">Loading…</dd></div>
+      </dl>
+      <p id="load-status" role="status">Loading the verification record…</p>
+      <section class="review-grid" aria-label="Georeferenced review">
+        <div>
+          <div class="toolbar">
+            <fieldset><legend>View</legend><label><input type="radio" name="extent" value="detail" checked>Science context</label><label><input type="radio" name="extent" value="overlay">Full mission crop</label></fieldset>
+            <fieldset><legend>Layer</legend><label><input type="radio" name="layer" value="optical" checked>Orbital image</label><label><input type="radio" name="layer" value="hillshade">Elevation hillshade</label></fieldset>
+          </div>
+          <figure class="map"><img id="review-map" src="./sites/columbia-hills/review/optical-detail.png" alt="North-up HiRISE review map showing Home Plate, the Gertrude Weise uncertainty area, a proposed approach, and candidate staging ground."><figcaption id="map-caption">Science context · approximately 364 m across · north up</figcaption></figure>
+          <ul class="legend">
+            <li><i class="home"></i>Home Plate · approximate outline</li>
+            <li><i class="science"></i>Science context · 15 m planning buffer</li>
+            <li><i class="approach"></i>Proposed approach · white cross</li>
+            <li><i class="staging"></i>Candidate staging search area</li>
+          </ul>
+        </div>
+        <aside>
+          <h2>A location supported by evidence</h2>
+          <p>Spirit observed the silica-rich soil named Gertrude Weise east of Home Plate. The amber area comes from registering the location marker in the published research map to this orthophoto.</p>
+          <p class="callout">The 15 m buffer is a local planning allowance. Absolute map accuracy is unknown. The approach and staging ground still require slope, obstacle and route checks.</p>
+          <h3>Two different observations</h3>
+          <p>The orbital image was acquired on <strong>22 November 2006</strong>. Spirit’s science mosaic was acquired on <strong>21 May 2007, sol 1202</strong>. The orbital image provides terrain context; it does not show the later wheel excavation.</p>
+          <h3>Projection checked</h3>
+          <p>The detached PDS label supplies the intended Mars projection and aligns exactly with the DTM grid. The JP2’s embedded georeferencing differs and is not used.</p>
+          <a class="record" href="./sites/columbia-hills/review/coverage-review.json">Open the verification record ↗</a>
+        </aside>
+      </section>
+      <section class="footprint-section">
+        <div>
+          <p class="eyebrow">Coverage, beyond the crop</p><h2>Keep the boundaries visible.</h2>
+          <p>The cyan outline follows the shared valid elevation and image footprint. The amber square is the roughly 1 km mission crop. Missing data outside that footprint stays unknown.</p>
+          <p id="source-coverage"></p>
+          <p>The hillshade is derived from measured elevation at a 1:1 horizontal and vertical scale. Orbital imagery retains its grayscale red-band appearance.</p>
+          <h3>Sources</h3>
+          <ul class="sources">
+            <li><a href="https://www.uahirise.org/dtm/PSP_001513_1655">HiRISE DTM and matching orthophoto</a></li>
+            <li><a href="https://science.nasa.gov/photojournal/spirits-tracks-around-home-plate/">NASA’s Home Plate reference image · PIA09089</a></li>
+            <li><a href="https://science.nasa.gov/photojournal/rovers-wheel-churns-up-bright-martian-soil/">NASA’s silica observation · PIA11758</a></li>
+            <li><a href="https://www.lpi.usra.edu/meetings/lpsc2008/pdf/2213.pdf">Ruff et al. (2008), Figure 1 · science location context</a></li>
+          </ul>
+        </div>
+        <figure><img src="./sites/columbia-hills/review/footprint-overview.png" alt="Full north-up HiRISE product footprint, with shared valid data outlined in cyan and the mission crop in amber."><figcaption>Full source product · north up</figcaption></figure>
+      </section>
+      <footer><p>NASA/JPL-Caltech/University of Arizona · DTM produced by USGS. MAREKH annotations are planning proposals.</p><p>Next: Phase 2 · Real terrain, slopes and analytic coverage masks.</p></footer>
+    </main>
+    <script type="module" src="/src/review.ts"></script>
+  </body>
+</html>

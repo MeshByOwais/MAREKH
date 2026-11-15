@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "mode": "crew",
+  "staging": {
+    "row": 371,
+    "column": 406
+  },
+  "checkedPieces": 4484,
+  "planSha256": "6cfc851a7e9123a440fac550e206b9ad111b743155a48ac71160ace2a53dee05",
+  "checker": "Independent Python geometry, verified native arrays, footprint and swept crew clearance",
+  "scope": "Downloaded browser live plan; no continuous optimality certificate"
+}

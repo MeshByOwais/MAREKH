@@ -1,0 +1,44 @@
+{
+  "name": "columbia-hills-phase-0",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.3.10",
+  "scripts": {
+    "dev": "bun --bun node_modules/vite/bin/vite.js --host 127.0.0.1",
+    "acquire:sources": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/acquire_sources.py",
+    "review:site": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/review_site.py",
+    "export:review": "bun tools/export_review.mjs",
+    "test:coverage": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" -m unittest discover -s tests -p 'test_phase1.py' -v",
+    "prepare:data": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/prepare_site.py",
+    "prepare:terrain": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/prepare_terrain.py",
+    "validate:terrain": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/validate_terrain.py",
+    "test:terrain": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" -m unittest discover -s tests -p 'test_phase2.py' -v && bun test tests/surface.test.ts",
+    "validate:package": "bun tools/validate-package.mjs",
+    "test:routing": "bun test tests/routing.test.ts",
+    "test": "bun run prepare:data && bun run validate:package && bun run test:routing",
+    "typecheck": "bun node_modules/typescript/bin/tsc --noEmit",
+    "build": "bun run validate:package && bun run validate:terrain && bun run validate:routes && bun run validate:crew && bun run validate:global && bun run typecheck && bun --bun node_modules/vite/bin/vite.js build",
+    "preview": "bun --bun node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 4173 --strictPort",
+    "generate:routes": "bun tools/generate_routes.ts && \"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/validate_routes.py --export",
+    "validate:routes": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/validate_routes.py",
+    "test:pathfinding": "bun test tests/planner.test.ts && \"${COLUMBIA_GDAL_PYTHON:-python3}\" -m unittest discover -s tests -p 'test_phase3.py' -v",
+    "generate:crew": "bun tools/generate_crew_routes.ts && \"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/validate_crew_routes.py --export",
+    "validate:crew": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/validate_crew_routes.py",
+    "test:crew": "bun test tests/crew-navigation.test.ts && \"${COLUMBIA_GDAL_PYTHON:-python3}\" -m unittest discover -s tests -p 'test_crew_navigation.py' -v",
+    "generate:global": "bun tools/generate_global_routes.ts && \"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/validate_global_routes.py --export",
+    "validate:global": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/validate_global_routes.py",
+    "test:global": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" -m unittest discover -s tests -p 'test_global_grade.py' -v",
+    "test:interactive": "bun test tests/interactive.test.ts",
+    "validate:live": "\"${COLUMBIA_GDAL_PYTHON:-python3}\" tools/validate_live_plan.py"
+  },
+  "dependencies": {
+    "three": "0.187.0"
+  },
+  "devDependencies": {
+    "@types/bun": "1.4.4",
+    "@types/three": "0.187.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.8"
+  }
+}

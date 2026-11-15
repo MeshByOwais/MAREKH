@@ -1,0 +1,14 @@
+{
+  "bounds": [
+    336,
+    537,
+    374,
+    586
+  ],
+  "vertexCount": 43026,
+  "lowerFaceCount": 85224,
+  "startIndex": 7274,
+  "goalIndex": 35751,
+  "spacingM": 1.0105412400975,
+  "oneWayBudgetM": 250
+}

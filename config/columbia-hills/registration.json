@@ -1,0 +1,111 @@
+{
+  "source": "Ruff et al. (2008), LPSC abstract 2213, Figure 1",
+  "sourceImageSize": [
+    739,
+    471
+  ],
+  "globalCorrelation": 0.7950669890963019,
+  "method": "masked normalized cross-correlation, then affine least squares on six local patches",
+  "pixelConvention": "zero-based centres",
+  "figureToRasterAffine": [
+    [
+      0.3301674776703219,
+      -0.0002720129449317304
+    ],
+    [
+      0.005448590752173743,
+      0.3439290095142056
+    ],
+    [
+      4772.885394890367,
+      6415.121865257923
+    ]
+  ],
+  "controls": [
+    {
+      "figurePixel": [
+        282,
+        76
+      ],
+      "rasterPixel": [
+        4866.0,
+        6441.0
+      ],
+      "correlation": 0.9530173052594132
+    },
+    {
+      "figurePixel": [
+        441,
+        97
+      ],
+      "rasterPixel": [
+        4919.0,
+        6448.0
+      ],
+      "correlation": 0.9143655064929269
+    },
+    {
+      "figurePixel": [
+        414,
+        242
+      ],
+      "rasterPixel": [
+        4911.0,
+        6498.0
+      ],
+      "correlation": 0.9236597630204058
+    },
+    {
+      "figurePixel": [
+        272,
+        235
+      ],
+      "rasterPixel": [
+        4864.0,
+        6496.0
+      ],
+      "correlation": 0.929679591026882
+    },
+    {
+      "figurePixel": [
+        343,
+        66
+      ],
+      "rasterPixel": [
+        4887.0,
+        6438.0
+      ],
+      "correlation": 0.8932581957165222
+    },
+    {
+      "figurePixel": [
+        474,
+        153
+      ],
+      "rasterPixel": [
+        4930.0,
+        6468.0
+      ],
+      "correlation": 0.674638572122271
+    }
+  ],
+  "fitResidualPixels": [
+    0.44630359377691275,
+    0.3634559319608015,
+    0.26271994509393587,
+    0.13194903140558212,
+    0.5758992334944244,
+    0.44344879225624834
+  ],
+  "leaveOneOutResidualPixels": [
+    0.9484161099031149,
+    0.5901578280115419,
+    0.5430456986015555,
+    0.47327050218431704,
+    0.9375194659419421,
+    0.8262695123968681
+  ],
+  "fitRmsPixels": 0.39707811725731945,
+  "leaveOneOutMaxPixels": 0.9484161099031149,
+  "absoluteGeolocationAccuracyM": null
+}

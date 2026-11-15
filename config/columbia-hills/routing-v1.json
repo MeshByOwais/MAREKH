@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "routeVersion": "columbia-hills-routes-1",
+  "datasetVersion": "columbia-hills-terrain-1",
+  "rules": { "warningSlopeDeg": 10, "routeSlopeLimitDeg": 20, "stagingSlopeLimitDeg": 5, "moveGradeLimitDeg": 20, "gentleWeight": 4 },
+  "rationale": {
+    "scope": "Versioned demonstration planning assumptions; not operational rover limits or human safety certification.",
+    "warningSlopeDeg": "Highlight edges above 10 degrees while retaining them below the hard route limit.",
+    "routeSlopeLimitDeg": "Block native surface slopes above 20 degrees for this first constrained planning demonstration.",
+    "stagingSlopeLimitDeg": "Require the entire staging footprint to be relatively flat, at most 5 degrees.",
+    "moveGradeLimitDeg": "Separately reject absolute along-move grades above 20 degrees, including all four cardinal side transitions of a diagonal.",
+    "gentleWeight": "Dimensionless weight 4: edge length multiplied by 1 + 4*(maximum supercover surface slope/20 degrees)^2. Shortest uses only three-dimensional length.",
+    "time": "No walking speed, terrain mobility or operational duration model has been established; estimated time is null."
+  },
+  "algorithm": { "search": "8-neighbor A*", "heuristic": "horizontal Euclidean distance in projected metres", "tieBreak": "ascending f, then h, then row-major cell index; fixed row/column neighbour order; retain first equal-cost predecessor", "diagonal": "Both side cells and all four endpoint-to-side cardinal transitions must be valid; include both side slopes in the edge maximum.", "return": "Reverse outbound geometry under symmetric passability; recompute signed grades and positive climb.", "routingFootprint": "Point path through conservative native-cell supercover; 10 m staging footprint is checked only at departure, not swept along the walking route." },
+  "staging": {
+    "cell": { "row": 370, "column": 406 }, "footprintWidthM": 10, "footprintHeightM": 10,
+    "selection": "Within the 50 m Phase 1 candidate square, compared centered 11-by-11 native-cell windows at rows 357..392 and columns 402..437. Row 370 column 406 minimizes maximum slope (tie broken by mean slope, row, column). Its continuous 10 m square touches all 121 cells in that window.",
+    "imageReview": "Inspected the native optical crop around the candidate square and Home Plate on 14 November 2026. Selected the subdued-texture western portion, away from the stronger ridge to the east; no resolved obstacle or reviewed exclusion intersects the square. Orbital resolution does not establish small-rock, bearing strength or absolute positioning safety.",
+    "approvalScope": "Demo departure only, contingent on footprint checks and successful routes; no operational approval."
+  },
+  "approach": {
+    "cell": { "row": 503, "column": 554 }, "footprintWidthM": 2, "footprintHeightM": 2,
+    "proposedEastNorthM": [1602.097981416713, -865443.9211631651],
+    "gridDecision": "Explicitly adopt the center of native cell (503,554) for this version, rather than the continuous Phase 1 proposal. Save the projected displacement in mission.json; route API itself accepts integer cells and never silently snaps.",
+    "approvalScope": "Demo approach within the registered 15 m science-context area; check 2 m square with route slope limit. The source observation remains approximate."
+  }
+}

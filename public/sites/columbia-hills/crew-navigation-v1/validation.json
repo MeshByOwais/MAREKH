@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "routeVersion": "columbia-hills-crew-navigation-1",
+  "datasetVersion": "columbia-hills-terrain-1",
+  "engine": "field-dstar-crew-local-1",
+  "missionType": "crew-walk",
+  "checker": "Independent Python full-grid least-squares terrain fit, whole-cell inflation and exact segment-to-hazard-box swept-footprint checks; no TypeScript engine imported",
+  "hazardCells": 93766,
+  "clearanceBlockedCells": 112198,
+  "effectiveCrewClearanceRadiusM": 1.0,
+  "sourceCheckedCells": 1183,
+  "sourceElevationMaxErrorM": 0,
+  "routes": [
+    {
+      "policy": "distance",
+      "checkedEdges": 2410,
+      "localSteps": 366,
+      "metrics": {
+        "distanceM": 404.429156891292,
+        "horizontalDistanceM": 403.21927666104693,
+        "positiveClimbM": 11.562839642239396,
+        "maxSurfaceSlopeDeg": 18.814661026000977,
+        "maxAbsGradeDeg": 17.177517918576058,
+        "warningEdgeCount": 98,
+        "cost": 403.21927666104693,
+        "estimatedTimeS": null
+      },
+      "sweptClearanceStatus": "passed",
+      "minimumNearbyRawHazardClearanceM": null,
+      "clearanceNote": "Null minimum means no raw hazard boxes in the finite audit neighbourhood; the required-radius swept capsule was fully checked."
+    },
+    {
+      "policy": "terrain",
+      "checkedEdges": 2102,
+      "localSteps": 215,
+      "metrics": {
+        "distanceM": 413.20797647996517,
+        "horizontalDistanceM": 412.2539964122111,
+        "positiveClimbM": 11.223839287722967,
+        "maxSurfaceSlopeDeg": 12.898210525512695,
+        "maxAbsGradeDeg": 14.308004364853641,
+        "warningEdgeCount": 34,
+        "cost": 493.24346858794786,
+        "estimatedTimeS": null
+      },
+      "sweptClearanceStatus": "passed",
+      "minimumNearbyRawHazardClearanceM": null,
+      "clearanceNote": "Null minimum means no raw hazard boxes in the finite audit neighbourhood; the required-radius swept capsule was fully checked."
+    }
+  ],
+  "estimatedTimeS": null,
+  "scope": "NASA-publication-based crew adaptation; independently verified native geometry and demo constraints. Field D* repair is tested separately against fresh fields. No claim of NASA flight equivalence, global optimality, subpixel obstacle resolution or human mobility certification."
+}

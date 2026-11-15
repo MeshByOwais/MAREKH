@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "routeVersion": "columbia-hills-global-grade-1",
+  "datasetVersion": "columbia-hills-terrain-1",
+  "engine": "continuous-grade-bounds-1",
+  "terrainManifestSha256": "22605bffd122a8e0719ac0b91cccfcb30c5ccd3360316de3c9e0d65eb3c9434f",
+  "crewManifestSha256": "91eecf900ac27c92ee82e39ed804f4a1b8537df904b7cc0868a37026ac906e6c",
+  "configSha256": "7ddfcca2146d613c90aa4df3eed8b10be073f2d37807305c0ebc4fd995a32211",
+  "rows": 990,
+  "columns": 990,
+  "transform": [
+    1041.8680185406238,
+    1.0105412400975,
+    0,
+    -864935.384435531,
+    0,
+    -1.0105412400975
+  ],
+  "crsWkt": "PROJCS[\"EQUIRECTANGULAR MARS\",GEOGCS[\"GCS_MARS\",DATUM[\"D_MARS\",SPHEROID[\"MARS_localRadius\",3395580,0]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Equirectangular\"],PARAMETER[\"standard_parallel_1\",-10],PARAMETER[\"central_meridian\",175.5],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+  "assets": {
+    "potential-2.150000.json": {
+      "bytes": 385,
+      "sha256": "42853037098908e1d972ff8e535cd4a11a1f51e26612e65137a6978c0928e146"
+    },
+    "potential-2.150000.f64": {
+      "bytes": 344208,
+      "sha256": "fb51cb9fc04b7780f69dcc40cf3da72f45c44f5e4a2738861be1b8f57bc98587"
+    },
+    "potential-2.601000.json": {
+      "bytes": 382,
+      "sha256": "38619b5331333be64d75ce8fef0e1309c5beca13f0889d6a7e37b9f084cc5a81"
+    },
+    "potential-2.601000.f64": {
+      "bytes": 344208,
+      "sha256": "a065dec5e64638d5802c2e23d52d556f89d551dd90a8099b6230559d091f05e6"
+    },
+    "config.json": {
+      "bytes": 2812,
+      "sha256": "7ddfcca2146d613c90aa4df3eed8b10be073f2d37807305c0ebc4fd995a32211"
+    },
+    "mission.json": {
+      "bytes": 4475,
+      "sha256": "5416c0715a8d498fc2152a911a9b17c864a1126bd22b359c3498c383e165fa53"
+    },
+    "routes.json": {
+      "bytes": 1140532,
+      "sha256": "5dfb7047e2dd424974443b75c04ba32e441045a4247327a2a6ef7ecc5b8de4ba"
+    },
+    "bounds.json": {
+      "bytes": 763,
+      "sha256": "7ff8254b8754b94b3a95b7b3ac2b163b0f11abc470a7f4eb99dfaa081ef7760d"
+    },
+    "domain.json": {
+      "bytes": 207,
+      "sha256": "ec68d85a2d07aa424509b97e311e4021fad0193f3ffa1c9c7ecd8ee93c5d665f"
+    },
+    "validation.json": {
+      "bytes": 2416,
+      "sha256": "099aabb80445a0f1d5dfe1185dde67064aa5ac5f9570ba4e6e35e5f18af017b8"
+    },
+    "route-review.gpkg": {
+      "bytes": 241664,
+      "sha256": "9b6198c69a8db2d349e93cc8bec42d5de9fa04e2c6e0c59807369250ea5c9a41"
+    },
+    "route-review.png": {
+      "bytes": 75211,
+      "sha256": "e62edc78d294899e5e53096a6069cca1c4f58e0b0430a64e430d92c5ea249127"
+    },
+    "route-edges.csv": {
+      "bytes": 184663,
+      "sha256": "a66d4a63acc6b61605ab41cb63c25ebbdb9d02b20e46be44bbcd16f302300d66"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "routeVersion": "columbia-hills-global-grade-1",
+  "datasetVersion": "columbia-hills-terrain-1",
+  "engine": "continuous-grade-bounds-1",
+  "objective": [
+    "minimum maximum absolute walking grade",
+    "minimum 3D walking distance at the reported feasible grade cap"
+  ],
+  "roundTripBudgetM": 500,
+  "portalElevationStepM": 0.001,
+  "gradeSearchToleranceDeg": 0.001,
+  "numericalLengthAllowanceM": 1e-05,
+  "crewConfig": "crew-navigation-v1.json",
+  "assumptions": {
+    "surface": "Complete native piecewise-planar elevation surface, with the same triangle diagonals and conservative crew clearance mask as crew-navigation-v1.",
+    "roundTrip": "Static, symmetric movement constraints. A feasible round trip has a leg of length at most half its budget; reversing that leg gives an equally good or better round trip. Search one way with a 250 m limit, then check both directions.",
+    "upperBound": "A grade-feasible elevation-portal graph provides a finite continuous polyline. A conic solve then moves its points continuously within the selected native faces and turn branches to reduce length at the grade cap. All final native pieces must pass actual grade, footprint and budget checks. Graph resolution and corridor refinement are not continuous error bounds.",
+    "lowerBound": "A conic optimizer proposes a continuous, piecewise-affine potential on the complete native budget rectangle. Its derivative is verified analytically in every allowed walking direction on every native triangle, globally rescaled conservatively, and its endpoint difference reduced by a numerical allowance. The independent checker does not import the optimizer.",
+    "secondaryObjective": "Distance bounds apply at the reported feasible grade cap. They do not assert exact lexicographic optimality at an unknown exact minimum grade.",
+    "mobility": "No minimum turn radius or step length. Very tight switchbacks are permitted by this mathematical crew-walk model. Orbital data and demonstration mobility limits are not operational certification."
+  },
+  "initialPortalElevationStepM": 0.005,
+  "upperCorridorRadiusM": 8
+}

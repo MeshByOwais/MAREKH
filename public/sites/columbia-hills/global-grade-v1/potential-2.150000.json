@@ -1,0 +1,13 @@
+{
+  "gradeDeg": 2.15,
+  "oneWayDistanceLowerM": 250.39737306771121,
+  "roundTripDistanceLowerM": 500.79474613542243,
+  "potentialFile": "potential-2.150000.f64",
+  "faceCount": 85224,
+  "maxUnscaledSupport": 1.000000003750692,
+  "scale": 1.000000004750692,
+  "numericalLengthAllowanceM": 0.00001,
+  "solverStatus": "AlmostSolved",
+  "solverIterations": 55,
+  "potentialBasisStep": 0
+}

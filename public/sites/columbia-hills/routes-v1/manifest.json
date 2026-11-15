@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "routeVersion": "columbia-hills-routes-1",
+  "datasetVersion": "columbia-hills-terrain-1",
+  "terrainManifestSha256": "22605bffd122a8e0719ac0b91cccfcb30c5ccd3360316de3c9e0d65eb3c9434f",
+  "configSha256": "dbbbb212a0fbc567311993236b419321b9800cfed6b954ebee1b1e2a68d14982",
+  "crsWkt": "PROJCS[\"EQUIRECTANGULAR MARS\",GEOGCS[\"GCS_MARS\",DATUM[\"D_MARS\",SPHEROID[\"MARS_localRadius\",3395580,0]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Equirectangular\"],PARAMETER[\"standard_parallel_1\",-10],PARAMETER[\"central_meridian\",175.5],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+  "assets": {
+    "config.json": {
+      "bytes": 3359,
+      "sha256": "dbbbb212a0fbc567311993236b419321b9800cfed6b954ebee1b1e2a68d14982"
+    },
+    "mission.json": {
+      "bytes": 4459,
+      "sha256": "ac87938e57309f76de172303f8cc552876536568aa27a7e106a9f191c9cfa537"
+    },
+    "routes.json": {
+      "bytes": 311347,
+      "sha256": "d451b51678276afae2198aefa5b581a601772c76136bb62c71add7857310d8dc"
+    },
+    "validation.json": {
+      "bytes": 1726,
+      "sha256": "ccd4979d82c8b221b90d2d81048bab8c971c3be3e7de367975de7616e04e8fbf"
+    },
+    "route-review.gpkg": {
+      "bytes": 217088,
+      "sha256": "1d907c15a862e20a85f251934c4465428c2a81bb04261fc649285fc7690ef77f"
+    },
+    "route-edges.csv": {
+      "bytes": 58523,
+      "sha256": "7cfc07f2318f953db295242b348d0eb167768b9b02c176f5846ee15c5cc4e7d3"
+    },
+    "route-review.png": {
+      "bytes": 76064,
+      "sha256": "89b29c7c1854f6ad66f62dd76911f6606e35d04b0e85df398d229230dc035e48"
+    }
+  }
+}

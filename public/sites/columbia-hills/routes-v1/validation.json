@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "routeVersion": "columbia-hills-routes-1",
+  "datasetVersion": "columbia-hills-terrain-1",
+  "checker": "Independent Python geometry, native-array and source-IMG audit; routing engine not imported",
+  "sourceElevationMaxErrorM": 0,
+  "uniqueSourceCheckedCells": 799,
+  "stagingCellCount": 121,
+  "stagingMaxSlopeDeg": 4.560972690582275,
+  "approachCellCount": 9,
+  "approachCenterDisplacementM": 0.29425513574996476,
+  "routes": [
+    {
+      "policy": "shortest",
+      "checkedEdges": 296,
+      "outboundPoints": 149,
+      "metrics": {
+        "distanceM": 411.3880645569345,
+        "horizontalDistanceM": 410.4624570070598,
+        "positiveClimbM": 10.6689453125,
+        "maxSurfaceSlopeDeg": 13.792267799377441,
+        "maxAbsGradeDeg": 12.567810701102726,
+        "warningEdgeCount": 16,
+        "cost": 411.3880645569345,
+        "estimatedTimeS": null
+      }
+    },
+    {
+      "policy": "gentle",
+      "checkedEdges": 308,
+      "outboundPoints": 155,
+      "metrics": {
+        "distanceM": 418.53683017915074,
+        "horizontalDistanceM": 417.56599324440117,
+        "positiveClimbM": 11.698974609375,
+        "maxSurfaceSlopeDeg": 9.944328308105469,
+        "maxAbsGradeDeg": 10.002032938036075,
+        "warningEdgeCount": 0,
+        "cost": 514.1416287547265,
+        "estimatedTimeS": null
+      }
+    }
+  ],
+  "estimatedTimeS": null,
+  "absoluteGeolocationAccuracyM": null,
+  "scope": "Every route edge, supercover side cell, diagonal side grade, endpoint footprint, signed grade, cumulative distance, cost, climb, turnaround and return closure. Optimality is separately tested against reference Dijkstra on fixtures; no claim of operational safety."
+}

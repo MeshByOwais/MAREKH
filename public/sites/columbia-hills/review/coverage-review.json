@@ -1,0 +1,240 @@
+{
+  "schemaVersion": 1,
+  "status": "phase-1-complete",
+  "siteId": "columbia-hills",
+  "crsWkt": "PROJCS[\"EQUIRECTANGULAR MARS\",GEOGCS[\"GCS_MARS\",DATUM[\"D_MARS\",SPHEROID[\"MARS_localRadius\",3395580,0]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Equirectangular\"],PARAMETER[\"standard_parallel_1\",-10],PARAMETER[\"central_meridian\",175.5],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+  "sphereRadiusM": 3395580.0,
+  "latitudeType": "planetocentric",
+  "longitudeDirection": "east",
+  "elevationReference": "Mars 2000 equipotential surface (label: Smith et al. 2001)",
+  "elevationScale": 1,
+  "elevationOffset": 0,
+  "horizontalAndVerticalUnits": "m",
+  "sourceDimensions": [
+    6524,
+    10847
+  ],
+  "transform": [
+    -3394.4080254874016,
+    1.0105412400975,
+    0.0,
+    -858887.2951135475,
+    0.0,
+    -1.0105412400975
+  ],
+  "nativeJp2Transform": [
+    -3392.8922136272554,
+    1.0105412400975,
+    0.0,
+    -858888.8109254077,
+    0.0,
+    -1.0105412400975
+  ],
+  "nativeJp2CrsWkt": "PROJCS[\"Equirectangular MARS\",GEOGCS[\"GCS_MARS\",DATUM[\"unnamed\",SPHEROID[\"unnamed\",3396190,0]],PRIMEM[\"Reference meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Equirectangular\"],PARAMETER[\"latitude_of_origin\",-10],PARAMETER[\"central_meridian\",175.5],PARAMETER[\"standard_parallel_1\",0],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+  "georeferencingDecision": "Open the detached .LBL with GDAL PDS; do not use the JP2 embedded CRS/transform. PDS label projection and grid match DTM exactly.",
+  "labelGridOffsetM": [
+    1.5158118601461865,
+    -1.5158118602121249
+  ],
+  "sharedValidSourceCells": 54514016,
+  "sourceCells": 70765828,
+  "opticalSaturatedPixels": 9862,
+  "opticalCoverageRule": "DN 0 is unknown (CORE_NULL); DN 1 and 255 are saturation indicators, not measured albedo. Preserve grayscale appearance.",
+  "crop": {
+    "sourcePixelWindow": [
+      4390,
+      5985,
+      990,
+      990
+    ],
+    "boundsWSEN": [
+      1041.8680185406238,
+      -865935.8202632276,
+      2042.3038462371487,
+      -864935.384435531
+    ],
+    "transform": [
+      1041.8680185406238,
+      1.0105412400975,
+      0.0,
+      -864935.384435531,
+      0.0,
+      -1.0105412400975
+    ],
+    "sizeM": [
+      1000.435827696525,
+      1000.435827696525
+    ],
+    "sharedValidCells": 980100,
+    "cells": 980100,
+    "sharedValidFraction": 1.0,
+    "elevationRangeM": [
+      -1939.976318359375,
+      -1834.114501953125
+    ]
+  },
+  "homePlateApproxLonLat": [
+    175.52659161110952,
+    -14.60291318129274
+  ],
+  "scienceContextApproxLonLat": [
+    175.52745024846126,
+    -14.602982859643406
+  ],
+  "registration": {
+    "source": "Ruff et al. (2008), LPSC abstract 2213, Figure 1",
+    "sourceImageSize": [
+      739,
+      471
+    ],
+    "globalCorrelation": 0.7950669890963019,
+    "method": "masked normalized cross-correlation, then affine least squares on six local patches",
+    "pixelConvention": "zero-based centres",
+    "figureToRasterAffine": [
+      [
+        0.3301674776703219,
+        -0.0002720129449317304
+      ],
+      [
+        0.005448590752173743,
+        0.3439290095142056
+      ],
+      [
+        4772.885394890367,
+        6415.121865257923
+      ]
+    ],
+    "controls": [
+      {
+        "figurePixel": [
+          282,
+          76
+        ],
+        "rasterPixel": [
+          4866.0,
+          6441.0
+        ],
+        "correlation": 0.9530173052594132
+      },
+      {
+        "figurePixel": [
+          441,
+          97
+        ],
+        "rasterPixel": [
+          4919.0,
+          6448.0
+        ],
+        "correlation": 0.9143655064929269
+      },
+      {
+        "figurePixel": [
+          414,
+          242
+        ],
+        "rasterPixel": [
+          4911.0,
+          6498.0
+        ],
+        "correlation": 0.9236597630204058
+      },
+      {
+        "figurePixel": [
+          272,
+          235
+        ],
+        "rasterPixel": [
+          4864.0,
+          6496.0
+        ],
+        "correlation": 0.929679591026882
+      },
+      {
+        "figurePixel": [
+          343,
+          66
+        ],
+        "rasterPixel": [
+          4887.0,
+          6438.0
+        ],
+        "correlation": 0.8932581957165222
+      },
+      {
+        "figurePixel": [
+          474,
+          153
+        ],
+        "rasterPixel": [
+          4930.0,
+          6468.0
+        ],
+        "correlation": 0.674638572122271
+      }
+    ],
+    "fitResidualPixels": [
+      0.44630359377691275,
+      0.3634559319608015,
+      0.26271994509393587,
+      0.13194903140558212,
+      0.5758992334944244,
+      0.44344879225624834
+    ],
+    "leaveOneOutResidualPixels": [
+      0.9484161099031149,
+      0.5901578280115419,
+      0.5430456986015555,
+      0.47327050218431704,
+      0.9375194659419421,
+      0.8262695123968681
+    ],
+    "fitRmsPixels": 0.39707811725731945,
+    "leaveOneOutMaxPixels": 0.9484161099031149,
+    "absoluteGeolocationAccuracyM": null
+  },
+  "relativeRegistrationRmsM": 0.4012638130287921,
+  "relativeRegistrationLeaveOneOutMaxM": 0.9584135918299406,
+  "absoluteGeolocationAccuracyM": null,
+  "heightImageAlignment": "Same orthorectified source grid and matching major landforms in optical/hillshade review. No independent ground-control accuracy claim.",
+  "approvedStagingPoint": null,
+  "approvedScienceApproach": null,
+  "references": [
+    {
+      "name": "Gertrude Weise observation",
+      "productId": "PIA11758",
+      "url": "https://science.nasa.gov/photojournal/rovers-wheel-churns-up-bright-martian-soil/",
+      "filename": "references/PIA11758.jpg",
+      "assetUrl": "https://assets.science.nasa.gov/dynamicimage/assets/science/psd/photojournal/pia/pia11/pia11758/PIA11758.jpg",
+      "credits": "NASA/JPL-Caltech/Cornell",
+      "observationDate": "2007-05-21",
+      "sol": 1202,
+      "sha256": "c938462f2f05db163a3494408691aa5cc1defe75e1d85a5822eeb29b89730de8",
+      "verifiedBytes": 127644,
+      "retrievedAt": "2026-11-14T15:53:20.379359+00:00"
+    },
+    {
+      "name": "Spirit tracks around Home Plate",
+      "url": "https://science.nasa.gov/photojournal/spirits-tracks-around-home-plate/",
+      "productId": "PIA09089",
+      "filename": "references/PIA09089.jpg",
+      "assetUrl": "https://assets.science.nasa.gov/dynamicimage/assets/science/psd/photojournal/pia/pia09/pia09089/PIA09089.jpg",
+      "credits": "NASA/JPL-Caltech/University of Arizona",
+      "observationDate": "2006-11-22",
+      "sha256": "48e0c9cfe65fc1e8108f35cde057657c6918c6c355907ad8daaa7e59e7fe1bfa",
+      "verifiedBytes": 134816,
+      "retrievedAt": "2026-11-14T15:53:20.382840+00:00"
+    },
+    {
+      "name": "Ruff et al. (2008), The nature and distribution of silica at Home Plate, Figure 1",
+      "productId": "LPSC-2008-2213",
+      "url": "https://www.lpi.usra.edu/meetings/lpsc2008/pdf/2213.pdf",
+      "assetUrl": "https://www.lpi.usra.edu/meetings/lpsc2008/pdf/2213.pdf",
+      "filename": "references/Ruff-2008-2213.pdf",
+      "use": "Local scientific reference and map registration; figure is not bundled into the app.",
+      "sha256": "09514ccd14ee32411b570ef336eb2d272a607682be7acfe95ce729f8d684ef9f",
+      "verifiedBytes": 905635,
+      "retrievedAt": "2026-11-14T15:53:20.390557+00:00"
+    }
+  ],
+  "credits": "NASA/JPL-Caltech/University of Arizona; DTM produced by USGS"
+}

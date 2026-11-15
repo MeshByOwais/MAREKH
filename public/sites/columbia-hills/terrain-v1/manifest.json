@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 2,
+  "datasetVersion": "columbia-hills-terrain-1",
+  "siteId": "columbia-hills",
+  "provenance": "HiRISE stereo-derived elevation and observed orbital imagery",
+  "rows": 990,
+  "columns": 990,
+  "transform": [
+    1041.8680185406238,
+    1.0105412400975,
+    0.0,
+    -864935.384435531,
+    0.0,
+    -1.0105412400975
+  ],
+  "crsWkt": "PROJCS[\"EQUIRECTANGULAR MARS\",GEOGCS[\"GCS_MARS\",DATUM[\"D_MARS\",SPHEROID[\"MARS_localRadius\",3395580,0]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Equirectangular\"],PARAMETER[\"standard_parallel_1\",-10],PARAMETER[\"central_meridian\",175.5],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+  "boundsWSEN": [
+    1041.8680185406238,
+    -865935.8202632276,
+    2042.3038462371487,
+    -864935.384435531
+  ],
+  "localOrigin": {
+    "eastM": 1542.0859323888862,
+    "northM": -865435.6023493792,
+    "elevationM": -1922.1690673828125
+  },
+  "units": {
+    "elevation": "m",
+    "slope": "deg"
+  },
+  "storage": {
+    "order": "row-major",
+    "floatByteOrder": "little-endian",
+    "rowDirection": "north-to-south"
+  },
+  "noData": {
+    "float": "NaN",
+    "coverage": "1 means finite elevation, finite native slope and non-null optical image"
+  },
+  "elevationReference": "Mars 2000 equipotential surface (label: Smith et al. 2001)",
+  "slopeMethod": {
+    "algorithm": "Horn",
+    "scale": 1,
+    "computeEdges": false,
+    "resolutionM": 1.0105412400975,
+    "inputElevationOffsetM": -1922.1507568359375,
+    "normalization": "Subtract a constant from the GDAL slope input to avoid Float32 cancellation; exported heights retain their original datum."
+  },
+  "texture": {
+    "path": "texture.webp",
+    "boundsWSEN": [
+      1041.8680185406238,
+      -865935.8202632276,
+      2042.3038462371487,
+      -864935.384435531
+    ],
+    "rows": 990,
+    "columns": 990,
+    "appearance": "lossless grayscale red-band; no colorization",
+    "productId": "PSP_001513_1655_RED_C_01_ORTHO"
+  },
+  "render": {
+    "stride": 2,
+    "verticalScale": 1,
+    "axes": {
+      "east": "+X",
+      "up": "+Y",
+      "north": "-Z"
+    },
+    "unknownPolicy": "Omit a display quad if any native coverage cell inside it is unknown"
+  },
+  "exclusions": {
+    "path": "exclusions.json",
+    "status": "Two visually reviewed regions; unmarked areas are not certified safe.",
+    "cells": 74529
+  },
+  "statistics": {
+    "validCells": 976144,
+    "cells": 980100,
+    "elevationMinM": -1939.976318359375,
+    "elevationMaxM": -1834.114501953125,
+    "slopeMinDeg": 0.00489399628713727,
+    "slopeMaxDeg": 38.264556884765625,
+    "slopePercentilesDeg": [
+      6.102590799331665,
+      13.84218425750733,
+      16.12824621200561,
+      20.212930908203113
+    ]
+  },
+  "sources": [
+    {
+      "kind": "elevation",
+      "productId": "DTEEC_001513_1655_001777_1650_U01",
+      "filename": "DTEEC_001513_1655_001777_1650_U01.IMG",
+      "url": "https://www.uahirise.org/PDS/DTM/PSP/ORB_001500_001599/PSP_001513_1655_PSP_001777_1650/DTEEC_001513_1655_001777_1650_U01.IMG",
+      "catalogueBytes": 283089408,
+      "sha256": "5e8a15e1422d076963b6ade27af9b6cc49033c4de3a30cd1e8ad53a044d89b5f",
+      "verifiedBytes": 283089408,
+      "retrievedAt": "2026-11-14T15:45:58.937279+00:00"
+    },
+    {
+      "kind": "optical",
+      "productId": "PSP_001513_1655_RED_C_01_ORTHO",
+      "filename": "PSP_001513_1655_RED_C_01_ORTHO.JP2",
+      "url": "https://www.uahirise.org/PDS/DTM/PSP/ORB_001500_001599/PSP_001513_1655_PSP_001777_1650/PSP_001513_1655_RED_C_01_ORTHO.JP2",
+      "catalogueBytes": 24931905,
+      "sha256": "fecc6be78b91fd41f42264e3d0f1376c6b2a378c5c12193fc98a2afe8971ac33",
+      "verifiedBytes": 24931905,
+      "retrievedAt": "2026-11-14T15:46:09.587466+00:00"
+    },
+    {
+      "kind": "optical-label",
+      "productId": "PSP_001513_1655_RED_C_01_ORTHO",
+      "filename": "PSP_001513_1655_RED_C_01_ORTHO.LBL",
+      "url": "https://www.uahirise.org/PDS/DTM/PSP/ORB_001500_001599/PSP_001513_1655_PSP_001777_1650/PSP_001513_1655_RED_C_01_ORTHO.LBL",
+      "catalogueBytes": 5325,
+      "sha256": "3a9ced7e8d9e326db7a306d164c3652ff79c23076d253d86169a553d87829248",
+      "verifiedBytes": 5325,
+      "retrievedAt": "2026-11-14T15:46:10.430347+00:00"
+    }
+  ],
+  "credits": "NASA/JPL-Caltech/University of Arizona; DTM produced by USGS",
+  "toolchain": {
+    "python": "3.12.3",
+    "gdal": "3.8.4",
+    "numpy": "1.26.4"
+  },
+  "exportVersion": "prepare-terrain-1",
+  "assets": {
+    "elevation.f32": {
+      "bytes": 3920400,
+      "sha256": "1c913e976d958f538d302638614510bdd189fc7e5190403575378829baa060c0"
+    },
+    "slope-deg.f32": {
+      "bytes": 3920400,
+      "sha256": "918a30cf9a36052a3cf3a7f4a29040529e71780017921483a95ffb53ef56cde5"
+    },
+    "coverage.u8": {
+      "bytes": 980100,
+      "sha256": "16b0cf49e48093b74855448c23e312abcefb2f141551a2446530d03bd0c93e8f"
+    },
+    "exclusions.u8": {
+      "bytes": 980100,
+      "sha256": "a8132bc71802fb2bc1b298468385812a9d80da60c0963a8d1b4599e99bc195c1"
+    },
+    "texture.webp": {
+      "bytes": 457474,
+      "sha256": "f396414a46be5f140b456dc24ee32907d837f45982d510b1cb69dc60608c34d4"
+    },
+    "hillshade.webp": {
+      "bytes": 319518,
+      "sha256": "9647933c80bc7857f4c3e28d2ff40df82447b9d5399782166df764ebcb72ea66"
+    },
+    "slope.webp": {
+      "bytes": 1305448,
+      "sha256": "80a03c0af1fd4732b7587179ff46ec135eb9759192106d26af940f974953402c"
+    },
+    "exclusions.webp": {
+      "bytes": 852,
+      "sha256": "7fcf681e138aa45fd85a59af4f7ab6b5282d4a210e0ea57cd5a0f55c8f272a62"
+    },
+    "mission.json": {
+      "bytes": 11319,
+      "sha256": "214a796e2a94394cd82f4972a5f4e0f81e9c8d57d3c449098105aaa72147b05a"
+    },
+    "exclusions.json": {
+      "bytes": 3471,
+      "sha256": "aae1dea407db51a824041bc94a3829cea3757c3329dab8c6f8207cf16d192ccd"
+    },
+    "north-up-validation.png": {
+      "bytes": 1446690,
+      "sha256": "1f009dafc8ca100549c0a8d72d230a3138e39a3ddf735333a0a9596d78ae31df"
+    }
+  }
+}

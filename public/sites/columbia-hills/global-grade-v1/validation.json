@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "routeVersion": "columbia-hills-global-grade-1",
+  "datasetVersion": "columbia-hills-terrain-1",
+  "engine": "continuous-grade-bounds-1",
+  "bounds": {
+    "status": "bounded",
+    "gradeLowerDeg": 2.15,
+    "gradeUpperDeg": 2.601,
+    "gradeGapDeg": 0.45100000000000007,
+    "gradeLowerCertificate": "potential-2.150000.f64",
+    "secondaryDistanceLowerM": 476.28631046522634,
+    "secondaryDistanceUpperM": 494.661999907313,
+    "secondaryDistanceGapM": 18.37568944208664,
+    "secondaryGradeCapDeg": 2.601,
+    "secondaryCertificate": "potential-2.601000.f64",
+    "roundTripBudgetM": 500,
+    "exactOptimumClaimed": false,
+    "numerics": "Double precision; conservative potential scaling and a 0.00001 m one-way subtraction. Not an interval-arithmetic proof.",
+    "scope": "Continuous piecewise-planar native terrain; static symmetric crew model; distance bounds at the reported feasible grade cap, not exact lexicographic optimum."
+  },
+  "certificates": [
+    {
+      "gradeDeg": 2.15,
+      "oneWayDistanceLowerM": 250.39737306771121,
+      "roundTripDistanceLowerM": 500.79474613542243,
+      "maximumAllowedDirectionalDerivative": 0.9999999990000067,
+      "checkedNativeFaces": 85224
+    },
+    {
+      "gradeDeg": 2.601,
+      "oneWayDistanceLowerM": 238.14315523261317,
+      "roundTripDistanceLowerM": 476.28631046522634,
+      "maximumAllowedDirectionalDerivative": 0.9999999989999927,
+      "checkedNativeFaces": 85224
+    }
+  ],
+  "sourceCheckedCells": 668,
+  "certificateSourceCheckedCells": 43026,
+  "sourceElevationMaxErrorM": 0,
+  "routes": [
+    {
+      "policy": "minimax-grade",
+      "checkedEdges": 1762,
+      "metrics": {
+        "distanceM": 494.661999907313,
+        "horizontalDistanceM": 494.2705127828872,
+        "positiveClimbM": 9.246597857743836,
+        "maxSurfaceSlopeDeg": 12.205559730529785,
+        "maxAbsGradeDeg": 2.6006186878764352,
+        "warningEdgeCount": 228,
+        "cost": 494.661999907313,
+        "estimatedTimeS": null
+      }
+    }
+  ],
+  "checker": "Independent native surface, closed-cell and swept-footprint checks; analytical all-heading potential check on every native triangle. No optimization solver or graph search imported.",
+  "scope": "Numerical continuous bounds for the stated terrain and static symmetric crew model. Secondary distance at the feasible grade cap; exact optimum not claimed."
+}

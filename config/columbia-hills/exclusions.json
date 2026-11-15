@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "crsWkt": "PROJCS[\"EQUIRECTANGULAR MARS\",GEOGCS[\"GCS_MARS\",DATUM[\"D_MARS\",SPHEROID[\"MARS_localRadius\",3395580,0]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Equirectangular\"],PARAMETER[\"standard_parallel_1\",-10],PARAMETER[\"central_meridian\",175.5],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+  "reviewDate": "2026-11-14",
+  "status": "Two visually reviewed regions; unmarked areas are not certified safe.",
+  "rasterization": "all touched cells, conservative boundary",
+  "features": [
+    {
+      "id": "west-bedforms",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              1084.8160212447676,
+              -865348.1905321109
+            ],
+            [
+              1235.386666019295,
+              -865356.2748620316
+            ],
+            [
+              1415.2630067566502,
+              -865457.3289860414
+            ],
+            [
+              1380.904604593335,
+              -865506.8455068062
+            ],
+            [
+              1200.0177226158826,
+              -865517.9614604472
+            ],
+            [
+              1076.7316913239874,
+              -865460.3606097617
+            ],
+            [
+              1084.8160212447676,
+              -865348.1905321109
+            ]
+          ]
+        ]
+      },
+      "reason": "Visible parallel ridged / bedform texture; precautionary planning exclusion pending closer review. No soil strength measurement is inferred.",
+      "sourceProduct": "PSP_001513_1655_RED_C_01_ORTHO",
+      "reviewImage": "public/sites/columbia-hills/review/optical.png",
+      "digitizedCropPixels": [
+        [
+          42,
+          408
+        ],
+        [
+          191,
+          416
+        ],
+        [
+          369,
+          516
+        ],
+        [
+          335,
+          565
+        ],
+        [
+          156,
+          576
+        ],
+        [
+          34,
+          519
+        ]
+      ]
+    },
+    {
+      "id": "east-bedforms",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              1737.6256623477525,
+              -865202.6725935368
+            ],
+            [
+              1922.554709285595,
+              -865174.377438814
+            ],
+            [
+              1980.1555599711526,
+              -865262.2945267025
+            ],
+            [
+              1937.7128278870575,
+              -865363.3486507123
+            ],
+            [
+              1756.825945909605,
+              -865344.1483671505
+            ],
+            [
+              1737.6256623477525,
+              -865202.6725935368
+            ]
+          ]
+        ]
+      },
+      "reason": "Visible parallel ridged / bedform texture; precautionary planning exclusion pending closer review. No soil strength measurement is inferred.",
+      "sourceProduct": "PSP_001513_1655_RED_C_01_ORTHO",
+      "reviewImage": "public/sites/columbia-hills/review/optical.png",
+      "digitizedCropPixels": [
+        [
+          688,
+          264
+        ],
+        [
+          871,
+          236
+        ],
+        [
+          928,
+          323
+        ],
+        [
+          886,
+          423
+        ],
+        [
+          707,
+          404
+        ]
+      ]
+    }
+  ]
+}
