@@ -2,8 +2,8 @@ export type ProfilePoint = {
   eastM: number; northM: number; elevationM: number; cumulativeDistanceM: number
   surfaceSlopeDeg: number; edgeSurfaceSlopeDeg: number; segmentGradeDeg: number
 }
-export type ProfileRoute = { outbound: {points: ProfilePoint[]}; returnLeg: {points: ProfilePoint[]}; turnaroundDistanceM: number; metrics: {distanceM: number} }
-export type ProfileSample = ProfilePoint & { distanceM: number; leg: 'Outbound'|'Return'|'Science turnaround'; reasons: string[] }
+export type ProfileRoute = { scienceStop?:boolean;completedDistanceM?:number;scienceMinutes?:number;samplingSpentMinutes?:number;name?:string; outbound: {points: ProfilePoint[]}; returnLeg: {points: ProfilePoint[]}; turnaroundDistanceM: number; metrics: {distanceM: number} }
+export type ProfileSample = ProfilePoint & { distanceM: number; leg: 'Outbound'|'Return'|'Science turnaround'|'Return decision'; reasons: string[] }
 export function slopeAlerts(slope: number, warningDeg: number) {
   return Number.isFinite(slope)&&slope>warningDeg?[`Steep surface: ${slope.toFixed(2)}° exceeds the ${warningDeg}° warning threshold.`]:[]
 }
@@ -26,6 +26,6 @@ export function createProfileSampler(route:ProfileRoute,warningDeg:number) {
   const span=b.cumulativeDistanceM-a.cumulativeDistanceM,t=span>0?Math.max(0,Math.min(1,(d-a.cumulativeDistanceM)/span)):0
   const mix=(x:number,y:number)=>x+(y-x)*t
   return {...b,eastM:mix(a.eastM,b.eastM),northM:mix(a.northM,b.northM),elevationM:mix(a.elevationM,b.elevationM),cumulativeDistanceM:d,distanceM:d,
-    leg:Math.abs(d-route.turnaroundDistanceM)<1e-6?'Science turnaround':d>route.turnaroundDistanceM?'Return':'Outbound',reasons:slopeAlerts(b.edgeSurfaceSlopeDeg,warningDeg)}
+    leg:Math.abs(d-route.turnaroundDistanceM)<1e-6?(route.scienceStop===false?'Return decision':'Science turnaround'):d>route.turnaroundDistanceM?'Return':'Outbound',reasons:slopeAlerts(b.edgeSurfaceSlopeDeg,warningDeg)}
   }
 }

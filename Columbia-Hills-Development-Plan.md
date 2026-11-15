@@ -214,9 +214,9 @@ In Three.js, use local east and north offsets from a recorded origin. Map east t
 
 The five user stories above are complete through Phase 5. The desktop/mobile rehearsal and clean-demo release checks are recorded in [the Phase 5 completion record](docs/phase-5-completion.md). Live continuous planning now uses the native portal/conic system with independent route checks and conservative analytical bounds; the tighter original conic certificates remain specific to their saved request.
 
-Future work is optional thermal observations, a documented walking model and radiation scenario, multiple sites, and tighter live continuous certificates. Each needs its own input data or model acceptance checks.
+The subsequent prototype-completion work adds editable environmental scenarios, a documented illustrative walking model, combined alerts, route/drop-off comparisons, incident and unknown-coverage repair, sampling/return decisions, and a configuration-driven mission loader. See [the implementation and limitations](docs/remaining-prototype-features.md). The site picker and other six datasets remain excluded. Historical thermal observations, validated human mobility, measured local radiation/shielding and tighter live continuous certificates remain future data/model work.
 
-Travel time, thermal coverage, operational terrain safety and absolute geolocation accuracy remain unresolved. The saved continuous walking-grade bounds apply to the original endpoints. Recomputing tight continuous certificates interactively is outside the completed Field D* / A* planning milestone.
+Travel time now has an explicitly illustrative editable estimate. Historical thermal coverage, validated human mobility, operational terrain safety and absolute geolocation accuracy remain unresolved. The saved continuous walking-grade bounds apply to the original endpoints. Recomputing tight continuous certificates interactively is outside the completed Field D* / A* planning milestone.
 
 [hirise]: https://www.uahirise.org/dtm/PSP_001513_1655
 [products]: https://www.uahirise.org/PDS/DTM/PSP/ORB_001500_001599/PSP_001513_1655_PSP_001777_1650/

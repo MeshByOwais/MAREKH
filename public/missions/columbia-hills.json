@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "columbia-hills",
+  "name": "Columbia Hills",
+  "region": "Home Plate \u00b7 Gusev Crater",
+  "terrain": "../sites/columbia-hills/terrain-v1/",
+  "defaultModel": "global",
+  "continuousServiceMission": "columbia-hills",
+  "focusFeatureId": "home-plate",
+  "packages": {
+    "global": {
+      "path": "../sites/columbia-hills/global-grade-v1/",
+      "version": "columbia-hills-global-grade-1"
+    },
+    "crew": {
+      "path": "../sites/columbia-hills/crew-navigation-v1/",
+      "version": "columbia-hills-crew-navigation-1"
+    },
+    "baseline": {
+      "path": "../sites/columbia-hills/routes-v1/",
+      "version": "columbia-hills-routes-1"
+    }
+  },
+  "science": {
+    "title": "Gertrude Weise: a clue left by water.",
+    "description": "Spirit\u2019s wheel exposed silica-rich soil east of Home Plate. Hot springs or volcanic steam are possible origins; both involve water. The mapped observation and proposed crew approach remain approximate.",
+    "image": "../sites/columbia-hills/science/PIA11758.jpg",
+    "imageAlt": "Spirit panorama showing a wheel trench exposing bright soil near Home Plate.",
+    "credit": "Spirit Panoramic Camera \u00b7 sol 1202 \u00b7 21 May 2007 \u00b7 approximately true color. NASA/JPL-Caltech/Cornell \u00b7 PIA11758.",
+    "source": "https://science.nasa.gov/photojournal/rovers-wheel-churns-up-bright-martian-soil/"
+  },
+  "scenario": {
+    "enabled": true,
+    "temperatureC": -60,
+    "spatialVariationC": 8,
+    "diurnalVariationC": 12,
+    "departureHour": 12,
+    "pressurePa": 636,
+    "doseRateUSvH": 27.9166666667,
+    "walkingSpeedMS": 0.6,
+    "gradePenalty": 4,
+    "samplingMinutes": 10,
+    "missionBudgetMinutes": 60,
+    "reserveMinutes": 10,
+    "coldAlertC": -65,
+    "doseAlertUSv": 15
+  },
+  "credits": "NASA/JPL-Caltech/University of Arizona \u00b7 DTM produced by USGS",
+  "context": {
+    "homeLabel": "Home Plate outline",
+    "scienceLabel": "Science context \u00b7 approximate 15 m buffer",
+    "stagingLabel": "Staging search area",
+    "reviewUrl": "../review.html"
+  }
+}

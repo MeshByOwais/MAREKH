@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "verifiedOn": "2026-11-15",
+  "scope": "Columbia Hills prototype features excluding the seven-site picker and other six datasets",
+  "checks": {
+    "typescriptTests": 69,
+    "pythonTests": 34,
+    "totalTests": 103,
+    "failed": 0,
+    "typecheck": "passed",
+    "fullSourceAuditBuild": "passed",
+    "preparedDemoBuild": "passed",
+    "preparedHashedAssets": 48
+  },
+  "browser": {
+    "continuousPair": {
+      "start": {
+        "row": 370,
+        "column": 406
+      },
+      "budgetM": 500,
+      "shorterPeakCapDeg": 6,
+      "shorterDistanceM": 408.54149497836386,
+      "shorterPeakDeg": 5.99999002520712,
+      "gentlerDistanceM": 496.3049310642896,
+      "gentlerPeakDeg": 2.591727601536457,
+      "bothIndependentlyAudited": true,
+      "bothVisibleTogether": true
+    },
+    "dropoffs": {
+      "A": {
+        "row": 370,
+        "column": 406,
+        "distanceM": 408.54149497836386
+      },
+      "B": {
+        "row": 370,
+        "column": 407,
+        "distanceM": 407.0031530321384
+      },
+      "commonObjective": "shortest-peak",
+      "commonPeakCapDeg": 6,
+      "commonBudgetM": 500,
+      "bothIndependentlyAudited": true
+    },
+    "combinedAlerts": {
+      "surfaceSlopeDeg": 10.36,
+      "groundScenarioC": -100,
+      "doseScenarioUSv": 0.25,
+      "doseAlertUSv": 0.01,
+      "slopeTemperatureRadiationAllHighlighted": true
+    },
+    "scienceDecision": {
+      "elapsedBeforeSamplingMinutes": 7.9,
+      "samplingSpentMinutes": 5,
+      "elapsedAfterSamplingMinutes": 12.9,
+      "skipRetainedSpentTime": true,
+      "returnPlaybackStarted": true
+    },
+    "incident": {
+      "positionM": 49.4661999907313,
+      "kind": "simulated boulder field",
+      "gradeCapDeg": 20,
+      "scienceDetourDistanceM": 412.3545156654376,
+      "scienceDetourPeakDeg": 17.10254558887446,
+      "returnNowDistanceM": 98.30996555803648,
+      "returnNowPeakDeg": 5.887525942385139,
+      "selectionRetainedHelmetAndPosition": true,
+      "subsequentGapBlockedPlayback": true,
+      "bothChoicesCheckedWithGap": true,
+      "resetRestoredOriginalProvenance": true
+    },
+    "routeTap": {
+      "cursorBeforeM": 0,
+      "cursorAfterM": 245.38,
+      "scienceApproachNearby": true
+    },
+    "mobile": {
+      "requestedViewport": [
+        390,
+        844
+      ],
+      "clientWidth": 375,
+      "documentWidth": 375,
+      "horizontalOverflow": false,
+      "visorAndReadingsVisible": true,
+      "nearTargetSpheresDoNotObstructHelmet": true
+    },
+    "missionDescriptor": {
+      "differentTitleAndScienceCardFromSettings": true,
+      "crewOnlyDescriptorLoadedTwoAuditedRoutes": true,
+      "unavailableModelsDisabled": true,
+      "consoleErrors": 0,
+      "fixtureUsedSameColumbiaTerrain": true
+    },
+    "export": {
+      "schemaVersion": 2,
+      "missionId": "columbia-hills",
+      "scenarioFields": 14,
+      "selectedCursorM": 242.384379954583,
+      "geometryAndScenarioIncluded": true,
+      "unapprovedIncidentExportRejectedAuditClaim": true
+    },
+    "proof": [
+      "remaining-prototype-desktop.png",
+      "remaining-prototype-mobile.png"
+    ],
+    "coverageGap": {
+      "terrainReadingsUnavailable": true,
+      "hudExplainsMissingDetail": true,
+      "playbackDisabled": true,
+      "resetRestoresOriginalMission": true
+    }
+  },
+  "limitations": [
+    "Environmental values and walking time are explicit editable demonstration models, not current Columbia Hills observations or validated astronaut mobility.",
+    "Incident repair is a checked heuristic Field D* crew route with a separate visible grade cap; no independent source audit or continuous certificate.",
+    "Continuous candidates retain numerical bounds; exact optimum remains unknown.",
+    "Descriptor loading is generic; the local continuous service remains registered to Columbia Hills. No site picker or additional site data was added."
+  ]
+}

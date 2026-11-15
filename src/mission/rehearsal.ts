@@ -9,14 +9,14 @@ export class RehearsalPlayback {
   playing=false
   stage:PlaybackStage='ready'
   private visitedScience=false
-  constructor(readonly totalM:number,readonly turnaroundM:number){
+  constructor(readonly totalM:number,readonly turnaroundM:number,readonly stopAtScience=true){
     if(!Number.isFinite(totalM)||!Number.isFinite(turnaroundM)||totalM<0||turnaroundM<0||turnaroundM>totalM)throw new Error('Invalid rehearsal distances')
   }
   seek(distance:number){
     if(!Number.isFinite(distance))throw new Error('Rehearsal distance must be finite')
     this.distanceM=Math.max(0,Math.min(this.totalM,distance));this.playing=false
     this.visitedScience=this.distanceM>=this.turnaroundM
-    this.stage=this.distanceM>=this.totalM?'complete':Math.abs(this.distanceM-this.turnaroundM)<1e-6?'science':this.distanceM===0?'ready':'paused'
+    this.stage=this.distanceM>=this.totalM?'complete':this.stopAtScience&&Math.abs(this.distanceM-this.turnaroundM)<1e-6?'science':this.distanceM===0?'ready':'paused'
   }
   play(){
     if(this.totalM<=0)return
@@ -30,7 +30,7 @@ export class RehearsalPlayback {
     if(!Number.isFinite(seconds)||!Number.isFinite(metresPerSecond)||seconds<0||metresPerSecond<=0)throw new Error('Invalid preview advance')
     if(!this.playing)return
     const next=Math.min(this.totalM,this.distanceM+seconds*metresPerSecond)
-    if(!this.visitedScience&&this.distanceM<this.turnaroundM&&next>=this.turnaroundM){
+    if(this.stopAtScience&&!this.visitedScience&&this.distanceM<this.turnaroundM&&next>=this.turnaroundM){
       this.distanceM=this.turnaroundM;this.visitedScience=true;this.playing=false;this.stage='science';return
     }
     this.distanceM=next

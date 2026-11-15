@@ -80,7 +80,7 @@ class Handler(SimpleHTTPRequestHandler):
         path=urlparse(self.path).path
         if not path.startswith('/api/'):return super().do_GET()
         if not self.allowed():return self.respond(403,{'error':'Local planner origin required.'})
-        if path=='/api/planner':return self.respond(200,{'available':True,'engine':'native-portals-conic-live-1','maximumRoundTripM':1200})
+        if path=='/api/planner':return self.respond(200,{'available':True,'missionId':'columbia-hills','engine':'native-portals-conic-live-1','maximumRoundTripM':1200})
         with LOCK:
             job=JOBS.get(path.removeprefix('/api/plans/'))
             if job is None:return self.respond(404,{'error':'Planning job not found.'})
